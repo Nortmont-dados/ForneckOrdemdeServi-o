@@ -743,6 +743,7 @@ tr.meta-row:hover td{background:#F2F8FB}
 
   <div class="fim">
     <span class="fim-nota" id="fimNota"></span>
+    <button type="button" class="btn btn-line" id="btnVerPdf">Ver PDF</button>
     <button type="button" class="btn-enviar" id="btnEnviar">Enviar ordem de serviço</button>
   </div>
 
@@ -2370,7 +2371,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         }).join("")+'</table>' : '';
 
     return ''
-      + '<div style="width:190mm;padding:0;font-family:Montserrat,Helvetica,Arial,sans-serif;color:#33404F;background:#fff">'
+      + '<div style="width:760px;padding:0;font-family:Montserrat,Helvetica,Arial,sans-serif;color:#33404F;background:#fff">'
 
       + '<div style="background:'+PDF_AZUL+';padding:16px 18px;color:#fff">'
       +   '<table style="width:100%;border-collapse:collapse"><tr>'
@@ -2452,20 +2453,36 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
 
   function gerarPdf(dados){
     if(typeof html2pdf!=="function") return Promise.resolve(null);
+
     var caixa=document.createElement("div");
-    caixa.style.cssText="position:fixed;left:-10000px;top:0;width:190mm;background:#fff";
+    caixa.style.cssText="position:absolute;top:0;left:-9999px;width:760px;background:#ffffff;z-index:-1";
     caixa.innerHTML=montarPdfHtml(dados);
     document.body.appendChild(caixa);
-    return html2pdf().set({
-      margin:[10,10,10,10],
-      filename:"ordem-de-servico.pdf",
-      image:{type:"jpeg", quality:.94},
-      html2canvas:{scale:2, useCORS:true, backgroundColor:"#ffffff"},
-      jsPDF:{unit:"mm", format:"a4", orientation:"portrait"},
-      pagebreak:{mode:["css","avoid-all"]}
-    }).from(caixa).outputPdf("datauristring")
-      .then(function(uri){ caixa.remove(); return String(uri).split(",")[1]; })
-      .catch(function(){ caixa.remove(); return null; });
+
+    var fontes = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+
+    return fontes.then(function(){
+      return new Promise(function(r){ setTimeout(r, 120); });   // deixa o desenho assentar
+    }).then(function(){
+      return html2pdf().set({
+        margin:[10,10,10,10],
+        filename:"ordem-de-servico.pdf",
+        image:{type:"jpeg", quality:.94},
+        html2canvas:{
+          scale:2, backgroundColor:"#ffffff", useCORS:true,
+          scrollX:0, scrollY:0, windowWidth:900, logging:false
+        },
+        jsPDF:{unit:"mm", format:"a4", orientation:"portrait"},
+        pagebreak:{mode:["css","avoid-all"]}
+      }).from(caixa).outputPdf("datauristring");
+    }).then(function(uri){
+      caixa.remove();
+      var b64=String(uri||"").split(",")[1] || "";
+      return b64.length>5000 ? b64 : null;    // muito pequeno = página em branco
+    }).catch(function(){
+      if(caixa.parentNode) caixa.remove();
+      return null;
+    });
   }
 
   /* ---------- envio da ordem de serviço ---------- */
@@ -2505,6 +2522,24 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     if(cor!=="carregando") fimNota._t=setTimeout(function(){ fimNota.textContent=""; }, 6000);
   }
 
+
+  document.getElementById("btnVerPdf").addEventListener("click", function(){
+    var b=this;
+    b.disabled=true; b.textContent="Desenhando…";
+    aviso("Gerando a prévia do PDF…", "carregando");
+    gerarPdf(coletarFicha()).then(function(pdf){
+      b.disabled=false; b.textContent="Ver PDF";
+      if(!pdf){ aviso("Não consegui desenhar o PDF nesta página.", "erro"); return; }
+      var bin=atob(pdf), buf=new Uint8Array(bin.length);
+      for(var i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
+      var url=URL.createObjectURL(new Blob([buf],{type:"application/pdf"}));
+      var a=document.createElement("a");
+      a.href=url; a.download="ordem-de-servico.pdf"; a.click();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+      aviso("Prévia baixada.", "ok");
+    });
+  });
+
   btnEnviar.addEventListener("click", function(){
     if(!ENVIO_URL){
       aviso("Envio não configurado: falta a URL do Apps Script no topo do arquivo.", "erro");
@@ -2540,8 +2575,9 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     btnEnviar.textContent="Enviando…";
     aviso("Desenhando o PDF e enviando…", "carregando");
 
+    var desenhou=true;
     gerarPdf(dados).then(function(pdf){
-      if(pdf) dados.pdf=pdf;
+      if(pdf) dados.pdf=pdf; else desenhou=false;
       return fetch(ENVIO_URL, {
         method:"POST",
         headers:{"Content-Type":"text/plain;charset=utf-8"},
@@ -2552,7 +2588,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     .then(function(t){
       var j=null; try{ j=JSON.parse(t); }catch(e){}
       if(j && j.ok===false) throw new Error(j.erro||"O servidor recusou o envio.");
-      aviso("Ordem de serviço enviada" + (ENVIO_PARA ? " para "+ENVIO_PARA : "") + ".", "ok");
+      aviso("Ordem de serviço enviada" + (ENVIO_PARA ? " para "+ENVIO_PARA : "") + "."
+            + (desenhou ? "" : " O PDF foi na versão simples, sem cores."), desenhou ? "ok" : "erro");
     })
     .catch(function(err){
       aviso("Não foi possível enviar: " + (err && err.message ? err.message : "falha de rede") + ".", "erro");
