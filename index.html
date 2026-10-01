@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ordem de serviço — Forneck Mattana</title>
+<title>Ficha de atendimento — Forneck Mattana</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -584,7 +584,7 @@ tr.meta-row:hover td{background:#F2F8FB}
   </div>
 
   <div class="tabs" role="tablist" aria-label="Seções">
-    <button type="button" class="tab" role="tab" id="tab-os" aria-controls="painel-os" aria-selected="true">Ordem de serviço</button>
+    <button type="button" class="tab" role="tab" id="tab-os" aria-controls="painel-os" aria-selected="true">Ficha de atendimento</button>
     <button type="button" class="tab" role="tab" id="tab-cad" aria-controls="painel-cad" aria-selected="false">Cadastros</button>
   </div>
 
@@ -604,7 +604,7 @@ tr.meta-row:hover td{background:#F2F8FB}
   <input type="file" id="fileCad" accept="application/json" hidden>
 </div>
 
-<!-- ================= ORDEM DE SERVIÇO ================= -->
+<!-- ================= FICHA DE ATENDIMENTO ================= -->
 <main class="sheet" id="painel-os" role="tabpanel" aria-labelledby="tab-os">
 
   <header class="masthead">
@@ -619,7 +619,7 @@ tr.meta-row:hover td{background:#F2F8FB}
       </div>
       </div>
       <div class="title">
-        <h2>Ordem de serviço</h2>
+        <h2>Ficha de atendimento</h2>
       </div>
       <div class="headmeta">
         <label class="f"><span class="f-label">Atendente</span><select name="agente" id="selAgente"></select></label>
@@ -744,7 +744,7 @@ tr.meta-row:hover td{background:#F2F8FB}
   <div class="fim">
     <span class="fim-nota" id="fimNota"></span>
     <button type="button" class="btn btn-line" id="btnVerPdf">Ver PDF</button>
-    <button type="button" class="btn-enviar" id="btnEnviar">Enviar ordem de serviço</button>
+    <button type="button" class="btn-enviar" id="btnEnviar">Enviar ficha de atendimento</button>
   </div>
 
 </main>
@@ -1820,45 +1820,9 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     var r=new FileReader();
     r.onload=function(){
       try{
-        var j=JSON.parse(r.result);
-        var itens = Array.isArray(j) ? j : j.itens;
-        if(Array.isArray(itens)){
-          catalogo = itens.map(function(it,i){
-            return {
-              id: it.id || ("x"+(i+1)),
-              nome: it.nome||"",
-              cat: it.cat==="Urnas e artigos" ? "Artigos" : (CATEGORIAS.indexOf(it.cat)>=0 ? it.cat : CATEGORIAS[0]),
-              un: it.un||"un.",
-              preco: typeof it.preco==="number" ? it.preco : parseBRL(it.preco),
-              custo: typeof it.custo==="number" ? it.custo : parseBRL(it.custo),
-                            modelos: Array.isArray(it.modelos) ? it.modelos.map(function(m){
-                return {nome:m.nome||"",
-                        preco: typeof m.preco==="number" ? m.preco : parseBRL(m.preco),
-                        custo: typeof m.custo==="number" ? m.custo : parseBRL(m.custo)};
-              }) : []
-            };
-          });
-          seq=catalogo.length;
-        }
-        if(Array.isArray(j.atendentes)){
-          atendentes = j.atendentes.map(function(a,i){
-            return {id:a.id||("a"+(i+1)), nome:a.nome||"", funcao:a.funcao||"", fone:a.fone||"", reg:a.reg||""};
-          });
-          seqA=atendentes.length;
-        }
-        if(Array.isArray(j.capelas)){
-          capelas = j.capelas.map(function(c,i){
-            return {id:c.id||("c"+(i+1)), nome:c.nome||"", end:c.end||"", cidade:c.cidade||"", fone:c.fone||""};
-          });
-          seqC=capelas.length;
-        }
-        var extras = j.cidadesExtra || j.cidades;
-        if(Array.isArray(extras)){
-          cidadesExtra = extras
-            .filter(function(c){ return c && c.nome; })
-            .map(function(c){ return {nome:c.nome, uf:(c.uf||"").toUpperCase()}; });
-        }
-        renderCat(); renderAten(); renderCap(); renderSelectsFicha(); renderOS();
+        if(!aplicarCadastro(JSON.parse(r.result))) throw new Error("vazio");
+        redesenharTudo();
+        revisarPendencia();
       }catch(err){ alert("Este arquivo não é um cadastro válido."); }
       fCad.value="";
     };
@@ -2381,7 +2345,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       +       '<div style="font-size:6pt;letter-spacing:.25em">ASSISTÊNCIA FAMILIAR</div>'
       +     '</td>'
       +     '<td style="vertical-align:middle;text-align:right">'
-      +       '<div style="font-size:13pt;font-weight:600">Ordem de serviço</div>'
+      +       '<div style="font-size:13pt;font-weight:600">Ficha de atendimento</div>'
       +       '<div style="font-size:8.5pt;padding-top:4px;opacity:.9">'+esc(ouPdf(c.data_atend))+' &nbsp;·&nbsp; '+esc(ouPdf(c.hora_atend))+'</div>'
       +       '<div style="font-size:8.5pt;opacity:.9">Atendente: '+esc(ouPdf(c.agente))+'</div>'
       +     '</td>'
@@ -2485,7 +2449,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     });
   }
 
-  /* ---------- envio da ordem de serviço ---------- */
+  /* ---------- envio da ficha de atendimento ---------- */
   function coletarFicha(){
     var campos={};
     camposFicha().forEach(function(el){
@@ -2588,7 +2552,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     .then(function(t){
       var j=null; try{ j=JSON.parse(t); }catch(e){}
       if(j && j.ok===false) throw new Error(j.erro||"O servidor recusou o envio.");
-      aviso("Ordem de serviço enviada" + (ENVIO_PARA ? " para "+ENVIO_PARA : "") + "."
+      aviso("Ficha de atendimento enviada" + (ENVIO_PARA ? " para "+ENVIO_PARA : "") + "."
             + (desenhou ? "" : " O PDF foi na versão simples, sem cores."), desenhou ? "ok" : "erro");
     })
     .catch(function(err){
@@ -2596,10 +2560,98 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     })
     .then(function(){
       btnEnviar.disabled=false;
-      btnEnviar.textContent="Enviar ordem de serviço";
+      btnEnviar.textContent="Enviar ficha de atendimento";
     });
   });
 
+
+
+  /* ---------- memória dos cadastros ---------- */
+  var CACHE_CAD="forneck_cadastros_v1";
+
+  function dadosCadastro(){
+    return {itens:catalogo, atendentes:atendentes, capelas:capelas, cidadesExtra:cidadesExtra};
+  }
+  function aplicarCadastro(j){
+    if(!j) return false;
+    var itens = Array.isArray(j) ? j : j.itens;
+    if(Array.isArray(itens)){
+      catalogo = itens.map(function(it,i){
+        return {
+          id: it.id || ("x"+(i+1)),
+          nome: it.nome||"",
+          cat: CATEGORIAS.indexOf(it.cat)>=0 ? it.cat : (it.cat==="Urnas e artigos" ? "Artigos" : CATEGORIAS[0]),
+          un: it.un||"un.",
+          preco: typeof it.preco==="number" ? it.preco : parseBRL(it.preco),
+          custo: typeof it.custo==="number" ? it.custo : parseBRL(it.custo),
+          modelos: Array.isArray(it.modelos) ? it.modelos.map(function(m){
+            return {nome:m.nome||"",
+                    preco: typeof m.preco==="number" ? m.preco : parseBRL(m.preco),
+                    custo: typeof m.custo==="number" ? m.custo : parseBRL(m.custo)};
+          }) : []
+        };
+      });
+      seq = catalogo.length;
+    }
+    if(Array.isArray(j.atendentes)){
+      atendentes = j.atendentes.map(function(a,i){
+        return {id:a.id||("a"+(i+1)), nome:a.nome||"", funcao:a.funcao||"", fone:a.fone||"", reg:a.reg||""};
+      });
+      seqA = atendentes.length;
+    }
+    if(Array.isArray(j.capelas)){
+      capelas = j.capelas.map(function(c,i){
+        return {id:c.id||("c"+(i+1)), nome:c.nome||"", end:c.end||"", cidade:c.cidade||"", fone:c.fone||""};
+      });
+      seqC = capelas.length;
+    }
+    var extras = j.cidadesExtra || j.cidades;
+    if(Array.isArray(extras)){
+      cidadesExtra = extras.filter(function(c){ return c && c.nome; })
+                           .map(function(c){ return {nome:c.nome, uf:(c.uf||"").toUpperCase()}; });
+    }
+    return true;
+  }
+  function redesenharTudo(){
+    renderCat(); renderAten(); renderCap(); renderSelectsFicha(); renderOS();
+  }
+
+  function guardarLocal(){
+    try{ localStorage.setItem(CACHE_CAD, JSON.stringify(dadosCadastro())); }catch(e){}
+  }
+  function lerLocal(){
+    try{ var t=localStorage.getItem(CACHE_CAD); return t ? JSON.parse(t) : null; }catch(e){ return null; }
+  }
+
+  function buscarCadastroRemoto(){
+    if(!ENVIO_URL) return;
+    fetch(ENVIO_URL+"?acao=cadastros", {method:"GET"})
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(j && j.ok && j.cadastros && Array.isArray(j.cadastros.itens) && j.cadastros.itens.length){
+          aplicarCadastro(j.cadastros);
+          guardarLocal();
+          redesenharTudo();
+          fixarCadastro();
+        }
+      })
+      .catch(function(){});
+  }
+
+  function gravarCadastroRemoto(){
+    if(!ENVIO_URL) return Promise.resolve(false);
+    return fetch(ENVIO_URL, {
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({acao:"salvarCadastros", cadastros:dadosCadastro()})
+    })
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      var j=null; try{ j=JSON.parse(t); }catch(e){}
+      return !!(j && j.ok);
+    })
+    .catch(function(){ return false; });
+  }
 
   /* ---------- confirmação das alterações de cadastro ---------- */
   var barraPend=document.getElementById("barraPend"),
@@ -2648,12 +2700,24 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     restaurarCadastro();
   });
   document.getElementById("btnConfirmar").addEventListener("click", function(){
+    var b=this;
     fixarCadastro();
+    guardarLocal();
     renderSelectsFicha(); renderOS();
+
     barraPend.hidden=false;
-    barraPend.classList.add("feito");
-    pendTxt.textContent="Alterações confirmadas.";
-    setTimeout(function(){ if(!haPendencia()) barraPend.hidden=true; }, 2200);
+    barraPend.classList.remove("feito");
+    pendTxt.textContent="Salvando os cadastros…";
+    b.disabled=true;
+
+    gravarCadastroRemoto().then(function(ok){
+      b.disabled=false;
+      barraPend.classList.toggle("feito", ok);
+      pendTxt.textContent = ok
+        ? "Alterações confirmadas e salvas na planilha."
+        : "Alterações confirmadas neste aparelho, mas não consegui salvar na planilha.";
+      setTimeout(function(){ if(!haPendencia()) barraPend.hidden=true; }, ok?2600:7000);
+    });
   });
 
   /* ===================== início ===================== */
@@ -2662,7 +2726,11 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   renderCat();
   renderAten();
   renderCap();
+
+  var local=lerLocal();
+  if(local && aplicarCadastro(local)) redesenharTudo();
   fixarCadastro();
+  buscarCadastroRemoto();
 })();
 </script>
 </body>
