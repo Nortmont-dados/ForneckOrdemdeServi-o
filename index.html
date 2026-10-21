@@ -110,7 +110,7 @@ h2,h3,p{margin:0}
 .masthead .title{margin-left:auto;text-align:right;flex:0 0 auto;min-width:0}
 .masthead .title h2{font-size:20px;font-weight:600;letter-spacing:-.01em;line-height:1.15}
 .masthead .title p.sub{font-size:11px;color:#fff;opacity:.9;margin-top:6px;font-weight:300;line-height:1.5}
-.headmeta{flex:1 0 100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-3) var(--space-4);margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px solid rgba(255,255,255,.22)}
+.headmeta{flex:1 0 100%;display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:var(--space-3) var(--space-4);margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px solid rgba(255,255,255,.22)}
 .headmeta .f-label{color:#fff;opacity:.85}
 .headmeta input{background:var(--surface);border-color:var(--surface);color:var(--azul-escuro)}
 .headmeta input:focus{background:var(--surface);border-color:var(--surface);box-shadow:0 0 0 3px rgba(255,255,255,.45)}
@@ -146,6 +146,50 @@ h2,h3,p{margin:0}
 #painel-os tbody td{background:var(--surface)}
 #painel-os tbody tr:hover td{background:#EDF5FA}
 #painel-os .row + .row{border-top-color:#D9E7EF}
+
+/* cabeçalho da ficha: campos lado a lado */
+.headmeta .f{grid-column:span 3}
+.headmeta .f.hm-sm{grid-column:span 2}   /* 3+3+2+3+3 = 14 */
+
+/* ---------- pendências de informação de pagamento ---------- */
+.tab-badge{
+  display:inline-block;min-width:17px;padding:0 5px;margin-left:6px;border-radius:var(--r-pill);
+  background:var(--warning);color:#fff;font-size:9.5px;font-weight:700;line-height:17px;text-align:center;
+  print-color-adjust:exact;-webkit-print-color-adjust:exact;
+}
+#painel-pend .card{background:var(--ficha-bg);border-color:var(--ficha-line)}
+#painel-pend .card-head{border-bottom-color:var(--ficha-line)}
+#painel-pend .card.card-accent{background:var(--nuvem);border-color:var(--ficha-line)}
+#painel-pend .f input,#painel-pend .f select{background-color:var(--surface);border-color:var(--ficha-line)}
+#painel-pend .par-tab td{background:transparent;border:0;padding:0}
+#painel-pend .par-tab tr:hover td{background:transparent}
+.pend-intro{font-size:11.5px;line-height:1.6;color:var(--muted);margin:0 0 var(--space-3);max-width:62ch}
+.pend-aviso{font-size:11px;font-weight:600;color:var(--muted);margin:0 0 var(--space-3);min-height:14px}
+.pend-aviso.erro{color:var(--danger)}
+.pend-filtro{max-width:260px;margin-bottom:var(--space-3)}
+.pend-lista{display:grid;gap:var(--space-2)}
+.pi-uni{
+  display:inline-block;background:var(--nuvem);color:var(--azul-escuro);border-radius:var(--r-pill);
+  padding:1px 9px;margin-right:7px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  print-color-adjust:exact;-webkit-print-color-adjust:exact;
+}
+.pend-item{
+  display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;
+  background:var(--surface);border:1.5px solid var(--ficha-line);border-radius:var(--r-lg);
+  padding:var(--space-3) var(--space-4);
+}
+.pi-dados{display:flex;flex-direction:column;gap:2px;flex:1;min-width:170px}
+.pi-dados b{font-size:14px;font-weight:600;color:var(--azul-escuro);overflow-wrap:anywhere}
+.pi-dados span{font-size:10.5px;color:var(--muted)}
+.pi-total{font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--azul);white-space:nowrap}
+.pend-resumo{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:var(--space-3);
+  margin-bottom:var(--space-4);padding-bottom:var(--space-4);border-bottom:1px solid var(--ficha-line);
+}
+.pend-resumo div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pend-resumo span{font-size:8.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.pend-resumo b{font-size:12.5px;font-weight:600;color:var(--azul-escuro);overflow-wrap:anywhere}
+.dica-pag{font-size:10px;line-height:1.5;color:var(--muted);margin-top:7px;display:block}
 
 /* ---------- campos ---------- */
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--space-3) var(--space-4)}
@@ -514,6 +558,7 @@ tr.meta-row:hover td{background:#F2F8FB}
   .tabs{padding-left:0;border-left:0}
   .cols,.fecho{grid-template-columns:1fr}
   .s2,.s3,.s4{grid-column:span 6}
+  .headmeta .f,.headmeta .f.hm-sm{grid-column:span 7}
   .s5,.s6,.s7,.s8,.s9{grid-column:span 12}
   .row-q{flex:1 0 100%}
   .scroll-x{
@@ -534,7 +579,7 @@ tr.meta-row:hover td{background:#F2F8FB}
 @media (max-width:660px){
   .masthead .title{flex:1 0 100%;margin-top:var(--space-2)}
   .lockup .word{font-size:19px}
-  .headmeta{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .headmeta .f,.headmeta .f.hm-sm{grid-column:span 7}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -585,6 +630,7 @@ tr.meta-row:hover td{background:#F2F8FB}
 
   <div class="tabs" role="tablist" aria-label="Seções">
     <button type="button" class="tab" role="tab" id="tab-os" aria-controls="painel-os" aria-selected="true">Ficha de atendimento</button>
+    <button type="button" class="tab" role="tab" id="tab-pend" aria-controls="painel-pend" aria-selected="false">Pendências<span class="tab-badge" id="pendBadge" hidden></span></button>
     <button type="button" class="tab" role="tab" id="tab-cad" aria-controls="painel-cad" aria-selected="false">Cadastros</button>
   </div>
 
@@ -599,6 +645,10 @@ tr.meta-row:hover td{background:#F2F8FB}
     <button type="button" class="btn btn-outline" id="btnExportCad">Salvar cadastros</button>
     <button type="button" class="btn btn-mint" id="btnPrintCad">Imprimir lista</button>
     <button type="button" class="btn btn-ghost" id="btnBloquear" title="Sair dos cadastros">Bloquear</button>
+  </div>
+
+  <div class="actions" id="acoesPend" hidden>
+    <button type="button" class="btn btn-mint" id="btnPendRecarregar">Atualizar lista</button>
   </div>
 
   <input type="file" id="fileCad" accept="application/json" hidden>
@@ -622,8 +672,9 @@ tr.meta-row:hover td{background:#F2F8FB}
         <h2>Ficha de atendimento</h2>
       </div>
       <div class="headmeta">
+        <label class="f"><span class="f-label">Unidade</span><select name="unidade" id="selUnidade"></select></label>
         <label class="f"><span class="f-label">Atendente</span><select name="agente" id="selAgente"></select></label>
-        <label class="f"><span class="f-label">Ficha nº</span><input name="ficha" placeholder="—"></label>
+        <label class="f hm-sm"><span class="f-label">Ficha nº</span><input name="ficha" id="inpFicha" inputmode="numeric" placeholder="—" title="Vem preenchido com o próximo número da unidade. Pode ser alterado à mão."></label>
         <label class="f"><span class="f-label">Data</span><input class="data" name="data_atend" value="29/05/2026" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off"></label>
         <label class="f"><span class="f-label">Horário</span><input class="hora" name="hora_atend" value="15:24" inputmode="numeric" maxlength="5" placeholder="--:--" autocomplete="off"></label>
       </div>
@@ -714,6 +765,7 @@ tr.meta-row:hover td{background:#F2F8FB}
             <label class="chip"><input type="radio" name="pagamento" value="Boleto">Boleto</label>
             <label class="chip"><input type="radio" name="pagamento" value="Dinheiro">Dinheiro</label>
           </div>
+          <span class="dica-pag">Ainda não definido? Pode enviar em branco — a ficha fica na aba <b>Pendências</b> até o pagamento ser informado.</span>
         </div>
         <label class="f s4"><span class="f-label">Parcelas</span><select name="parcelas" id="selParcelas"></select></label>
         <label class="f s4"><span class="f-label">Vencimento da 1ª</span><input class="data" name="vencimento" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off"></label>
@@ -749,12 +801,85 @@ tr.meta-row:hover td{background:#F2F8FB}
 
 </main>
 
+<!-- ================= PENDÊNCIA DE INFORMAÇÃO DE PAGAMENTO ================= -->
+<main class="sheet" id="painel-pend" role="tabpanel" aria-labelledby="tab-pend" hidden>
+
+  <section class="card">
+    <div class="card-head">
+      <h3>Pendência de informação de pagamento</h3>
+      <span class="tag" id="tagPend">0 fichas</span>
+    </div>
+    <p class="pend-intro">
+      Toda ficha enviada sem a forma de pagamento fica guardada aqui. Quando a família definir
+      como vai pagar, abra a ficha, preencha o pagamento e reenvie: o e-mail sai com o assunto
+      <b>ATUALIZAÇÃO FORMA DE PAGAMENTO</b> e o nome do falecido, e a planilha é atualizada.
+    </p>
+    <p class="pend-aviso" id="pendAviso"></p>
+    <label class="f pend-filtro"><span class="f-label">Filtrar por unidade</span><select id="pendFiltroUni"></select></label>
+    <div class="pend-lista" id="pendLista"></div>
+  </section>
+
+  <section class="card card-accent" id="pendEditor" hidden>
+    <div class="card-head">
+      <h3 id="pendTitulo">Forma de pagamento</h3>
+      <span class="tag" id="pendTag">—</span>
+    </div>
+
+    <div class="pend-resumo" id="pendResumo"></div>
+
+    <div class="fecho">
+      <div>
+        <div class="grid" style="align-content:start">
+          <div class="f s12">
+            <span class="f-label">Forma de pagamento</span>
+            <div class="chips" style="padding-top:2px">
+              <label class="chip"><input type="radio" name="p_pagamento" value="Cartão de crédito">Cartão de crédito</label>
+              <label class="chip"><input type="radio" name="p_pagamento" value="Cartão de débito">Cartão de débito</label>
+              <label class="chip"><input type="radio" name="p_pagamento" value="Pix">Pix</label>
+              <label class="chip"><input type="radio" name="p_pagamento" value="Boleto">Boleto</label>
+              <label class="chip"><input type="radio" name="p_pagamento" value="Dinheiro">Dinheiro</label>
+            </div>
+          </div>
+          <label class="f s4"><span class="f-label">Parcelas</span><select id="pendParcelas"></select></label>
+          <label class="f s4"><span class="f-label">Vencimento da 1ª</span><input class="data" id="pendVenc" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off"></label>
+          <label class="f s4"><span class="f-label">Nota / duplicata nº</span><input id="pendDuplicata" placeholder="—"></label>
+        </div>
+
+        <div class="parcelas">
+          <div class="par-head">
+            <span>Parcelamento</span>
+            <button type="button" class="par-btn" id="btnPendDividir">Dividir igualmente</button>
+          </div>
+          <table class="par-tab"><tbody id="pendParBody"></tbody></table>
+          <p class="par-status" id="pendParStatus"></p>
+        </div>
+      </div>
+
+      <div class="totalbox">
+        <div class="line">
+          <span class="lbl">Total da ficha</span>
+          <span class="val"><small>R$</small><span id="pendTotal">0,00</span></span>
+        </div>
+        <p class="extenso" id="pendExtenso"></p>
+      </div>
+    </div>
+
+    <div class="fim">
+      <span class="fim-nota" id="pendNota"></span>
+      <button type="button" class="btn btn-line" id="btnPendFechar">Fechar</button>
+      <button type="button" class="btn-enviar" id="btnPendEnviar">Reenviar com o pagamento</button>
+    </div>
+  </section>
+
+</main>
+
 <!-- ================= CADASTROS ================= -->
 <main class="sheet" id="painel-cad" role="tabpanel" aria-labelledby="tab-cad" hidden>
 
 
   <div class="subnav" role="tablist" aria-label="Cadastros">
     <button type="button" class="snav" role="tab" id="sn-prod" aria-selected="true">Produtos e serviços</button>
+    <button type="button" class="snav" role="tab" id="sn-uni"  aria-selected="false">Unidades</button>
     <button type="button" class="snav" role="tab" id="sn-aten" aria-selected="false">Atendentes</button>
     <button type="button" class="snav" role="tab" id="sn-cap"  aria-selected="false">Capelas</button>
   </div>
@@ -812,6 +937,31 @@ tr.meta-row:hover td{background:#F2F8FB}
     </div>
     <span class="dica-rolagem">Arraste a tabela para o lado para ver todas as colunas</span>
     <p class="vazio-msg" id="urnaVazio" hidden>Nenhuma urna cadastrada.</p>
+  </section>
+
+  <!-- unidades -->
+  <section class="card" id="cad-uni" hidden>
+    <div class="card-head"><h3>Unidades</h3><span class="tag" id="tagUni">0 unidades</span></div>
+    <div class="catbar">
+      <label class="f"><span class="f-label">Buscar por nome ou cidade</span><input id="buscaUni" placeholder="Digite parte do nome ou da cidade"></label>
+      <button type="button" class="btn btn-solid" id="btnAddUni">Adicionar unidade</button>
+    </div>
+    <div class="scroll-x">
+      <table>
+        <thead>
+          <tr>
+            <th>Unidade</th>
+            <th style="width:230px">Endereço</th>
+            <th style="width:150px">Cidade / UF</th>
+            <th style="width:140px">Telefone</th>
+            <th class="rm"></th>
+          </tr>
+        </thead>
+        <tbody id="uniBody"></tbody>
+      </table>
+    </div>
+    <span class="dica-rolagem">Arraste a tabela para o lado para ver todas as colunas</span>
+    <p class="vazio-msg" id="uniVazio" hidden>Nenhuma unidade encontrada.</p>
   </section>
 
   <!-- atendentes -->
@@ -890,11 +1040,12 @@ var ENVIO_PARA = "comercial.forneck@gmail.com";   // só para exibir na tela; o 
 /* Campos que precisam estar preenchidos para a ficha poder ser enviada.
    Para tornar algum opcional, apague o nome da lista. Para exigir outro, acrescente. */
 var CAMPOS_OBRIGATORIOS = [
-  "agente", "data_atend", "hora_atend",
+  "unidade", "agente", "data_atend", "hora_atend",
   "falecido_nome", "nascimento", "data_falec", "local_falec", "cemiterio", "hora_sep",
-  "contratante", "parentesco", "endereco", "numero", "bairro", "uf", "cidade", "telefone", "cpf",
-  "pagamento"
+  "contratante", "parentesco", "endereco", "numero", "bairro", "uf", "cidade", "telefone", "cpf"
 ];
+/* "pagamento" fica de fora de propósito: a ficha pode ser enviada sem a forma de pagamento
+   definida. Nesse caso ela entra na aba "Pendências" até alguém informar o pagamento. */
 var EXIGIR_ITENS = true;      // pelo menos um produto ou serviço marcado
 var EXIGIR_PARCELAS = true;   // soma das parcelas igual ao total
 
@@ -970,6 +1121,11 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   ];
   var seqA = 1;
 
+  var unidades = [
+    {id:"u1", nome:"Montenegro", end:"Av. Ernesto Popp, 148 — Cinco de Maio", cidade:"Montenegro/RS", fone:"(51) 3632-2202"}
+  ];
+  var seqU = 1;
+
   var capelas = [
     {id:"c1", nome:"Capela de Ouro Branco",  end:"", cidade:"Ouro Branco/RS", fone:""},
     {id:"c2", nome:"Capela Forneck Mattana", end:"Av. Ernesto Popp, 148 — Cinco de Maio", cidade:"Montenegro/RS", fone:"(51) 3632-2202"}
@@ -992,6 +1148,10 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   var lanc = { i05:{modelo:"", q:"1", vu:"560,00", sel:true} };
   var livres = [];
 
+  var CACHE_UNI = "forneck_unidade_v1";
+  var fichaUnidade = (function(){
+    try{ return localStorage.getItem(CACHE_UNI) || ""; }catch(e){ return ""; }
+  })();
   var fichaAgente = "Jessica";
   var fichaCapela = "Capela de Ouro Branco";
   var fichaUF = "RS";
@@ -1062,31 +1222,41 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   }
 
   /* ===================== abas ===================== */
-  var tabOS=document.getElementById("tab-os"), tabCad=document.getElementById("tab-cad");
-  var panOS=document.getElementById("painel-os"), panCad=document.getElementById("painel-cad");
-  var acOS=document.getElementById("acoesOS"), acCad=document.getElementById("acoesCad");
+  var tabOS=document.getElementById("tab-os"), tabCad=document.getElementById("tab-cad"),
+      tabPend=document.getElementById("tab-pend");
+  var panOS=document.getElementById("painel-os"), panCad=document.getElementById("painel-cad"),
+      panPend=document.getElementById("painel-pend");
+  var acOS=document.getElementById("acoesOS"), acCad=document.getElementById("acoesCad"),
+      acPend=document.getElementById("acoesPend");
+
+  var ABAS = [["os","tab-os","painel-os","acoesOS"],
+              ["pend","tab-pend","painel-pend","acoesPend"],
+              ["cad","tab-cad","painel-cad","acoesCad"]];
 
   function abrir(qual){
-    var os=(qual==="os");
-    if(os && typeof haPendencia==="function" && haPendencia()){
+    if(qual!=="cad" && typeof haPendencia==="function" && haPendencia()){
       if(confirm("Há alterações não confirmadas nos cadastros. Confirmar agora?\n\nCancelar descarta as alterações.")) fixarCadastro();
       else restaurarCadastro();
     }
-    tabOS.setAttribute("aria-selected", os?"true":"false");
-    tabCad.setAttribute("aria-selected", os?"false":"true");
-    panOS.hidden=!os; panCad.hidden=os;
-    acOS.hidden=!os;  acCad.hidden=os;
-    if(os){ renderSelectsFicha(); renderOS(); }
-    else  { renderCat(); renderAten(); renderCap(); }
+    ABAS.forEach(function(a){
+      var on=(a[0]===qual);
+      document.getElementById(a[1]).setAttribute("aria-selected", on?"true":"false");
+      document.getElementById(a[2]).hidden=!on;
+      document.getElementById(a[3]).hidden=!on;
+    });
+    if(qual==="os"){ renderSelectsFicha(); renderOS(); }
+    else if(qual==="cad"){ renderCat(); renderUni(); renderAten(); renderCap(); }
+    else if(qual==="pend" && typeof pendCarregar==="function"){ pendCarregar(); }
     window.scrollTo(0,0);
   }
   tabOS.addEventListener("click", function(){ abrir("os"); });
+  tabPend.addEventListener("click", function(){ abrir("pend"); });
   tabCad.addEventListener("click", function(){
     if(cadLiberado) abrir("cad"); else pedirSenha();
   });
 
   /* sub-navegação dos cadastros */
-  var SEC = [["sn-prod",["cad-prod","cad-urna"]],["sn-aten",["cad-aten"]],["sn-cap",["cad-cap"]]];
+  var SEC = [["sn-prod",["cad-prod","cad-urna"]],["sn-uni",["cad-uni"]],["sn-aten",["cad-aten"]],["sn-cap",["cad-cap"]]];
   SEC.forEach(function(par){
     document.getElementById(par[0]).addEventListener("click", function(){
       SEC.forEach(function(p){
@@ -1098,7 +1268,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   });
 
   /* ===================== listas suspensas da ficha ===================== */
-  var selAgente=document.getElementById("selAgente"), selCapela=document.getElementById("selCapela"),
+  var selUnidade=document.getElementById("selUnidade"),
+      selAgente=document.getElementById("selAgente"), selCapela=document.getElementById("selCapela"),
       selUF=document.getElementById("selUF"), selCidade=document.getElementById("selCidade");
 
   function montarSelect(sel, valores, atual, vazioTxt){
@@ -1135,6 +1306,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     selCidade.disabled = false;
   }
   function renderSelectsFicha(){
+    montarSelect(selUnidade, unidades.filter(function(u){ return u.nome; }).map(function(u){ return u.nome; }),
+                 fichaUnidade, "Selecione…");
     montarSelect(selAgente, atendentes.filter(function(a){ return a.nome; }).map(function(a){ return a.nome; }),
                  fichaAgente, "Selecione…");
     montarCapelas();
@@ -1142,6 +1315,28 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     montarCidades();
   }
   selAgente.addEventListener("change", function(){ fichaAgente = selAgente.value; });
+  selUnidade.addEventListener("change", function(){
+    fichaUnidade = selUnidade.value;
+    try{ localStorage.setItem(CACHE_UNI, fichaUnidade); }catch(e){}   /* o computador da unidade lembra a escolha */
+    sugerirFicha(true);
+  });
+
+  /* ---------- numeração automática da ficha, por unidade ---------- */
+  var inpFicha=document.getElementById("inpFicha");
+
+  function sugerirFicha(forcar){
+    if(!inpFicha || !ENVIO_URL || !fichaUnidade) return;
+    if(!forcar && inpFicha.value.trim()) return;
+    var antes=inpFicha.placeholder;
+    inpFicha.placeholder="…";
+    fetch(ENVIO_URL+"?acao=proximaFicha&unidade="+encodeURIComponent(fichaUnidade)+"&t="+(new Date().getTime()))
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(j && j.ok && j.proxima) inpFicha.value=String(j.proxima);
+      })
+      .catch(function(){})           /* sem rede, o número fica em branco para digitar à mão */
+      .then(function(){ inpFicha.placeholder=antes; });
+  }
   function montarCapelas(){
     var lista=capelas.filter(function(c){ return c.nome; }).map(function(c){ return c.nome; });
     var h='<option value="">Selecione…</option>';
@@ -1733,6 +1928,56 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     if(tr){ tr.scrollIntoView({block:"center"}); tr.querySelector(".a-nome").focus(); }
   });
 
+  /* ===================== cadastro: unidades ===================== */
+  var uniBody=document.getElementById("uniBody"),
+      uniVazio=document.getElementById("uniVazio"),
+      buscaUni=document.getElementById("buscaUni");
+
+  function renderUni(){
+    var t=buscaUni.value.trim().toLowerCase();
+    var lista=unidades.filter(function(u){
+      return !t || u.nome.toLowerCase().indexOf(t)>=0 || u.cidade.toLowerCase().indexOf(t)>=0;
+    });
+    var h="";
+    lista.forEach(function(u){
+      h += '<tr data-id="'+u.id+'">'
+        + '<td><input class="u-nome" value="'+esc(u.nome)+'" placeholder="Nome da unidade" aria-label="Nome da unidade"></td>'
+        + '<td><input class="u-end" value="'+esc(u.end)+'" placeholder="Rua, número, bairro" aria-label="Endereço"></td>'
+        + '<td><input class="u-cidade" value="'+esc(u.cidade)+'" placeholder="Cidade/UF" aria-label="Cidade e UF"></td>'
+        + '<td><input class="u-fone" value="'+esc(u.fone)+'" placeholder="(00) 0000-0000" aria-label="Telefone"></td>'
+        + '<td class="rm"><button type="button" class="del u-del" aria-label="Excluir unidade">&times;</button></td>'
+        + '</tr>';
+    });
+    uniBody.innerHTML=h;
+    uniVazio.hidden = lista.length>0;
+    document.getElementById("tagUni").textContent=unidades.length+(unidades.length===1?" unidade":" unidades");
+  }
+
+  uniBody.addEventListener("input", function(e){
+    var u=porIdEm(unidades, e.target.closest("tr").dataset.id); if(!u) return;
+    if(e.target.classList.contains("u-nome"))   u.nome=e.target.value;
+    if(e.target.classList.contains("u-end"))    u.end=e.target.value;
+    if(e.target.classList.contains("u-cidade")) u.cidade=e.target.value;
+    if(e.target.classList.contains("u-fone"))   u.fone=e.target.value;
+  });
+  uniBody.addEventListener("click", function(e){
+    if(!e.target.classList.contains("u-del")) return;
+    var u=porIdEm(unidades, e.target.closest("tr").dataset.id); if(!u) return;
+    if(!confirm('Excluir "'+(u.nome||"unidade sem nome")+'" do cadastro?')) return;
+    unidades = unidades.filter(function(x){ return x.id!==u.id; });
+    renderUni();
+  });
+  buscaUni.addEventListener("input", renderUni);
+  document.getElementById("btnAddUni").addEventListener("click", function(){
+    seqU++;
+    var novo={id:"u"+seqU, nome:"", end:"", cidade:"", fone:""};
+    unidades.push(novo);
+    buscaUni.value="";
+    renderUni();
+    var tr=uniBody.querySelector('tr[data-id="'+novo.id+'"]');
+    if(tr){ tr.scrollIntoView({block:"center"}); tr.querySelector(".u-nome").focus(); }
+  });
+
   /* ===================== cadastro: capelas ===================== */
   var capBody=document.getElementById("capBody"),
       capVazio=document.getElementById("capVazio"),
@@ -1839,6 +2084,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     fichaAgente=""; fichaCapela=""; fichaUF=""; fichaCidade="";
     lanc={}; livres=[]; parcelas=[]; parEditado=false; selParcelas.value="1";
     pintarChips(); renderSelectsFicha(); renderOS();
+    sugerirFicha(true);
     selAgente.focus();
   });
 
@@ -2348,6 +2594,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       +       '<div style="font-size:13pt;font-weight:600">Ficha de atendimento</div>'
       +       '<div style="font-size:8.5pt;padding-top:4px;opacity:.9">'+esc(ouPdf(c.data_atend))+' &nbsp;·&nbsp; '+esc(ouPdf(c.hora_atend))+'</div>'
       +       '<div style="font-size:8.5pt;opacity:.9">Atendente: '+esc(ouPdf(c.agente))+'</div>'
+      +       '<div style="font-size:8.5pt;opacity:.9">Unidade: '+esc(ouPdf(c.unidade))+'</div>'
+      +       '<div style="font-size:8.5pt;opacity:.9">Ficha nº '+esc(ouPdf(c.ficha))+'</div>'
       +     '</td>'
       +   '</tr></table>'
       + '</div>'
@@ -2430,7 +2678,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     }).then(function(){
       return html2pdf().set({
         margin:[10,10,10,10],
-        filename:"ordem-de-servico.pdf",
+        filename:"ficha-de-atendimento.pdf",
         image:{type:"jpeg", quality:.94},
         html2canvas:{
           scale:2, backgroundColor:"#ffffff", useCORS:true,
@@ -2468,6 +2716,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       var q=qtdEfetiva(l), vu=parseBRL(l.vu);
       itens.push({item:(l.d||"Outros serviços"), modelo:"", unidade:"", qtd:q, valorUnit:vu, total:q*vu});
     });
+    if(campos.pagamento===undefined) campos.pagamento="";
     return {
       campos:campos,
       itens:itens,
@@ -2498,7 +2747,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       for(var i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
       var url=URL.createObjectURL(new Blob([buf],{type:"application/pdf"}));
       var a=document.createElement("a");
-      a.href=url; a.download="ordem-de-servico.pdf"; a.click();
+      a.href=url; a.download="ficha-de-atendimento.pdf"; a.click();
       setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
       aviso("Prévia baixada.", "ok");
     });
@@ -2527,7 +2776,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       aviso("Marque pelo menos um produto ou serviço antes de enviar.", "erro");
       return;
     }
-    if(EXIGIR_PARCELAS && dados.total>0){
+    if(EXIGIR_PARCELAS && dados.total>0 && String(dados.campos.pagamento||"").trim()){
       var somaPar=dados.parcelas.reduce(function(a,pr){ return a+pr.valor; },0);
       if(Math.abs(somaPar-dados.total)>0.005){
         aviso("A soma das parcelas não fecha com o total. Ajuste o parcelamento.", "erro");
@@ -2552,8 +2801,11 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     .then(function(t){
       var j=null; try{ j=JSON.parse(t); }catch(e){}
       if(j && j.ok===false) throw new Error(j.erro||"O servidor recusou o envio.");
+      var semPag = !String(dados.campos.pagamento||"").trim();
       aviso("Ficha de atendimento enviada" + (ENVIO_PARA ? " para "+ENVIO_PARA : "") + "."
+            + (semPag ? " Sem forma de pagamento: ficou na aba Pendências." : "")
             + (desenhou ? "" : " O PDF foi na versão simples, sem cores."), desenhou ? "ok" : "erro");
+      if(semPag && typeof pendCarregar==="function") pendCarregar();
     })
     .catch(function(err){
       aviso("Não foi possível enviar: " + (err && err.message ? err.message : "falha de rede") + ".", "erro");
@@ -2566,11 +2818,339 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
 
 
 
+  /* ============ pendência de informação de pagamento ============ */
+  var pendListaEl  = document.getElementById("pendLista"),
+      pendEditor   = document.getElementById("pendEditor"),
+      pendAvisoEl  = document.getElementById("pendAviso"),
+      pendTagEl    = document.getElementById("tagPend"),
+      pendBadgeEl  = document.getElementById("pendBadge"),
+      pendResumoEl = document.getElementById("pendResumo"),
+      pendTituloEl = document.getElementById("pendTitulo"),
+      pendSeloEl   = document.getElementById("pendTag"),
+      pendSelPar   = document.getElementById("pendParcelas"),
+      pendVenc     = document.getElementById("pendVenc"),
+      pendDup      = document.getElementById("pendDuplicata"),
+      pendParBody  = document.getElementById("pendParBody"),
+      pendParStat  = document.getElementById("pendParStatus"),
+      pendTotalEl  = document.getElementById("pendTotal"),
+      pendExtEl    = document.getElementById("pendExtenso"),
+      pendNotaEl   = document.getElementById("pendNota"),
+      btnPendEnv   = document.getElementById("btnPendEnviar"),
+      pendFiltro   = document.getElementById("pendFiltroUni");
+
+  var pendentes=[], pendAtual=null, pendPar=[], pendBuscando=false;
+
+  (function(){
+    var h="";
+    for(var i=1;i<=12;i++) h += '<option value="'+i+'">'+i+(i===1?"x (à vista)":"x")+'</option>';
+    pendSelPar.innerHTML=h;
+  })();
+
+  function pendMsg(txt, cor){
+    pendNotaEl.textContent=txt;
+    pendNotaEl.style.color = cor==="ok" ? "var(--success)" : cor==="erro" ? "var(--danger)" : "var(--muted)";
+  }
+  function pendNum(v){ return typeof v==="number" ? v : parseBRL(v); }
+  function pendTotalNum(){ return parseBRL(pendTotalEl.textContent); }
+
+  function pendContador(visiveis){
+    var n=pendentes.length;
+    pendTagEl.textContent = (visiveis!=null && visiveis!==n)
+      ? visiveis+" de "+n+(n===1?" ficha":" fichas")
+      : (n===1 ? "1 ficha" : n+" fichas");
+    pendBadgeEl.textContent = n ? String(n) : "";
+    pendBadgeEl.hidden = !n;
+  }
+
+  function pendUnidades(){
+    var vistas=[];
+    pendentes.forEach(function(p){
+      var u=String(p.unidade||"").trim();
+      if(u && vistas.indexOf(u)<0) vistas.push(u);
+    });
+    return vistas.sort(function(a,b){ return a.localeCompare(b,"pt-BR"); });
+  }
+  function pendMontarFiltro(){
+    var atual=pendFiltro.value||"", lista=pendUnidades();
+    var h='<option value="">Todas as unidades</option>';
+    lista.forEach(function(u){
+      h += '<option value="'+esc(u)+'"'+(u===atual?" selected":"")+'>'+esc(u)+'</option>';
+    });
+    pendFiltro.innerHTML=h;
+    pendFiltro.parentNode.hidden = lista.length<2;
+    if(lista.indexOf(atual)<0) pendFiltro.value="";
+  }
+
+  function pendPintar(){
+    var filtro=pendFiltro.value||"";
+    var lista=pendentes.filter(function(p){ return !filtro || String(p.unidade||"")===filtro; });
+    pendContador(lista.length);
+    if(!lista.length){
+      pendListaEl.innerHTML='<p class="vazio-msg">'
+        + (pendentes.length ? "Nenhuma ficha pendente nesta unidade." : "Nenhuma ficha com pagamento pendente.")
+        + '</p>';
+      return;
+    }
+    pendListaEl.innerHTML = lista.map(function(p){
+      return '<div class="pend-item" data-id="'+esc(p.id)+'">'
+        + '<div class="pi-dados">'
+        +   '<b>'+esc(p.falecido||"(sem nome)")+'</b>'
+        +   '<span>'
+        +     (p.unidade ? '<span class="pi-uni">'+esc(p.unidade)+'</span>' : '')
+        +     (p.numero ? 'ficha '+esc(p.numero)+' &nbsp;·&nbsp; ' : '')
+        +     esc(p.atendente||"atendente não informado")+' &nbsp;·&nbsp; atendimento '+esc(p.data||"—")
+        +   '</span>'
+        + '</div>'
+        + '<div class="pi-total">R$ '+fmtBRL(pendNum(p.total))+'</div>'
+        + '<button type="button" class="btn btn-solid pi-abrir">Informar pagamento</button>'
+        + '</div>';
+    }).join("");
+  }
+  pendFiltro.addEventListener("change", pendPintar);
+
+  function pendCarregar(){
+    if(!ENVIO_URL){
+      pendAvisoEl.textContent="A lista vem da planilha. Falta a URL do Apps Script no topo do arquivo.";
+      pendAvisoEl.className="pend-aviso erro";
+      pendPintar();
+      return;
+    }
+    if(pendBuscando) return;
+    pendBuscando=true;
+    pendAvisoEl.textContent="Buscando as fichas pendentes…";
+    pendAvisoEl.className="pend-aviso";
+    fetch(ENVIO_URL+"?acao=pendencias&t="+(new Date().getTime()))
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(!j || j.ok===false) throw new Error((j && j.erro) || "resposta inesperada do servidor");
+        if(!Array.isArray(j.pendencias)){
+          pendentes=[];
+          pendAvisoEl.textContent="A planilha respondeu, mas ainda não conhece as pendências. "
+            + "Publique a nova versão do Apps Script em Implantar › Gerenciar implantações › Nova versão.";
+          pendAvisoEl.className="pend-aviso erro";
+          pendPintar();
+          return;
+        }
+        pendentes = j.pendencias;
+        pendMontarFiltro();
+        pendAvisoEl.textContent="";
+        pendAvisoEl.className="pend-aviso";
+        pendPintar();
+      })
+      .catch(function(err){
+        pendAvisoEl.textContent="Não consegui buscar a lista: "+(err && err.message ? err.message : "falha de rede")+".";
+        pendAvisoEl.className="pend-aviso erro";
+        pendPintar();
+      })
+      .then(function(){ pendBuscando=false; });
+  }
+
+  function pendDatas(n){
+    var base=lerData(pendVenc.value), saida=[];
+    for(var i=0;i<n;i++) saida.push(base ? somaMeses(base,i) : "");
+    return saida;
+  }
+  function pendRepartir(soma, n){ return dividir(soma, n, pendDatas(n)); }
+
+  function pendPintarPar(){
+    var h="";
+    pendPar.forEach(function(pr,i){
+      h += '<tr data-i="'+i+'">'
+        + '<td class="np">'+(i+1)+'ª</td>'
+        + '<td><input class="data pr-venc" value="'+esc(pr.venc)+'" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off" aria-label="Vencimento da parcela '+(i+1)+'"></td>'
+        + '<td><input class="pr-val" value="'+esc(pr.valor)+'" inputmode="decimal" placeholder="0,00" aria-label="Valor da parcela '+(i+1)+'"></td>'
+        + '</tr>';
+    });
+    pendParBody.innerHTML=h;
+  }
+  function pendStatusPar(){
+    var soma=pendTotalNum();
+    var s=pendPar.reduce(function(a,pr){ return a+parseBRL(pr.valor); },0);
+    var dif=Math.round((s-soma)*100)/100;
+    if(!(soma>0) && s===0){ pendParStat.textContent=""; pendParStat.className="par-status"; return; }
+    if(Math.abs(dif)<0.005){
+      pendParStat.textContent="Soma das parcelas: R$ "+fmtBRL(s)+" — confere com o total.";
+      pendParStat.className="par-status ok";
+    }else{
+      pendParStat.textContent="Soma das parcelas: R$ "+fmtBRL(s)+" — "
+        + (dif<0 ? "faltam R$ "+fmtBRL(-dif) : "excede em R$ "+fmtBRL(dif))+".";
+      pendParStat.className="par-status erro";
+    }
+  }
+
+  function pendResumoItem(rot, val){
+    return '<div><span>'+esc(rot)+'</span><b>'+esc(String(val==null?"":val).trim() || "—")+'</b></div>';
+  }
+  function pendAchar(id){
+    for(var i=0;i<pendentes.length;i++) if(String(pendentes[i].id)===String(id)) return pendentes[i];
+    return null;
+  }
+
+  function pendAbrir(id){
+    var p=pendAchar(id);
+    if(!p) return;
+    pendAtual=p;
+    var f=p.ficha||{}, c=f.campos||{};
+    var qtd=(f.itens||[]).length;
+
+    pendTituloEl.textContent = c.falecido_nome ? ("Pagamento — "+c.falecido_nome) : "Forma de pagamento";
+    pendSeloEl.textContent = "atendimento "+(String(c.data_atend||"").trim() || "—");
+
+    var tot = pendNum(f.total) || pendNum(p.total) || 0;
+    pendTotalEl.textContent = fmtBRL(tot);
+    pendExtEl.textContent = tot>0 ? porExtenso(tot)+"." : "";
+
+    pendResumoEl.innerHTML =
+        pendResumoItem("Unidade", c.unidade)
+      + pendResumoItem("Ficha nº", c.ficha)
+      + pendResumoItem("Falecido", c.falecido_nome)
+      + pendResumoItem("Contratante", c.contratante)
+      + pendResumoItem("Telefone", c.telefone)
+      + pendResumoItem("Sepultamento", c.hora_sep)
+      + pendResumoItem("Atendente", c.agente)
+      + pendResumoItem("Itens", qtd + (qtd===1 ? " item lançado" : " itens lançados"));
+
+    document.querySelectorAll('[name="p_pagamento"]').forEach(function(r){
+      r.checked = (r.value === String(c.pagamento||""));
+    });
+    pintarChips();
+
+    var n = parseInt(c.parcelas,10); if(!(n>=1 && n<=12)) n=1;
+    pendSelPar.value = String(n);
+    pendVenc.value = c.vencimento || "";
+    pendDup.value  = c.duplicata || "";
+    pendPar = pendRepartir(tot, n);
+    pendPintarPar();
+    pendStatusPar();
+    pendMsg("", "");
+
+    pendEditor.hidden=false;
+    pendEditor.scrollIntoView({block:"start", behavior:"smooth"});
+  }
+
+  pendListaEl.addEventListener("click", function(e){
+    var b=e.target.closest(".pi-abrir"); if(!b) return;
+    var it=b.closest(".pend-item");
+    if(it) pendAbrir(it.getAttribute("data-id"));
+  });
+
+  pendSelPar.addEventListener("change", function(){
+    pendPar=pendRepartir(pendTotalNum(), parseInt(pendSelPar.value,10)||1);
+    pendPintarPar(); pendStatusPar();
+  });
+  document.getElementById("btnPendDividir").addEventListener("click", function(){
+    pendPar=pendRepartir(pendTotalNum(), pendPar.length||1);
+    pendPintarPar(); pendStatusPar();
+  });
+  pendVenc.addEventListener("change", function(){
+    var datas=pendDatas(pendPar.length||1);
+    pendPar.forEach(function(pr,i){ pr.venc = datas[i] || pr.venc; });
+    pendPintarPar();
+  });
+  pendParBody.addEventListener("input", function(e){
+    var tr=e.target.closest("tr"); if(!tr) return;
+    var pr=pendPar[+tr.getAttribute("data-i")]; if(!pr) return;
+    if(e.target.classList.contains("pr-venc")) pr.venc=e.target.value;
+    if(e.target.classList.contains("pr-val")){ pr.valor=e.target.value; pendStatusPar(); }
+  });
+  pendParBody.addEventListener("blur", function(e){
+    if(!e.target.classList || !e.target.classList.contains("pr-val")) return;
+    var tr=e.target.closest("tr"); if(!tr) return;
+    var pr=pendPar[+tr.getAttribute("data-i")];
+    if(pr && e.target.value.trim()){
+      pr.valor=fmtBRL(parseBRL(e.target.value));
+      e.target.value=pr.valor;
+      pendStatusPar();
+    }
+  }, true);
+  document.addEventListener("change", function(e){
+    if(e.target.name!=="p_pagamento") return;
+    if(["Pix","Cartão de débito","Dinheiro"].indexOf(e.target.value)>=0){
+      pendSelPar.value="1";
+      pendPar=pendRepartir(pendTotalNum(), 1);
+      pendPintarPar(); pendStatusPar();
+    }
+  });
+  document.getElementById("btnPendFechar").addEventListener("click", function(){
+    pendEditor.hidden=true; pendAtual=null;
+  });
+  document.getElementById("btnPendRecarregar").addEventListener("click", function(){ pendCarregar(); });
+
+  btnPendEnv.addEventListener("click", function(){
+    if(!pendAtual){ pendMsg("Escolha uma ficha da lista primeiro.", "erro"); return; }
+    if(!ENVIO_URL){ pendMsg("Envio não configurado: falta a URL do Apps Script.", "erro"); return; }
+
+    var forma="";
+    document.querySelectorAll('[name="p_pagamento"]').forEach(function(r){ if(r.checked) forma=r.value; });
+    if(!forma){ pendMsg("Escolha a forma de pagamento antes de reenviar.", "erro"); return; }
+
+    var tot=pendTotalNum();
+    var soma=pendPar.reduce(function(a,pr){ return a+parseBRL(pr.valor); },0);
+    if(EXIGIR_PARCELAS && tot>0 && Math.abs(soma-tot)>0.005){
+      pendMsg("A soma das parcelas não fecha com o total. Ajuste o parcelamento.", "erro");
+      return;
+    }
+
+    var base=pendAtual.ficha||{}, antigos=base.campos||{}, campos={};
+    for(var k in antigos) if(Object.prototype.hasOwnProperty.call(antigos,k)) campos[k]=antigos[k];
+    campos.pagamento  = forma;
+    campos.parcelas   = pendSelPar.value;
+    campos.vencimento = pendVenc.value;
+    campos.duplicata  = pendDup.value;
+
+    var ficha={
+      campos: campos,
+      itens: base.itens||[],
+      total: tot,
+      extenso: base.extenso || (tot>0 ? porExtenso(tot)+"." : ""),
+      parcelas: pendPar.map(function(pr){ return {venc:pr.venc, valor:parseBRL(pr.valor)}; }),
+      enviadoEm: base.enviadoEm || "",
+      atualizadoEm: new Date().toISOString()
+    };
+
+    var idAtual=pendAtual.id, desenhou=true;
+    btnPendEnv.disabled=true;
+    btnPendEnv.textContent="Reenviando…";
+    pendMsg("Desenhando o PDF e reenviando…", "carregando");
+
+    gerarPdf(ficha).then(function(pdf){
+      if(!pdf) desenhou=false;
+      return fetch(ENVIO_URL, {
+        method:"POST",
+        headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body: JSON.stringify({acao:"concluirPendencia", id:idAtual, ficha:ficha, pdf:pdf||""})
+      });
+    })
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      var j=null; try{ j=JSON.parse(t); }catch(e){}
+      if(j && j.ok===false) throw new Error(j.erro||"O servidor recusou o reenvio.");
+      pendMsg("Pagamento informado e e-mail reenviado"+(ENVIO_PARA ? " para "+ENVIO_PARA : "")+"."
+              +(desenhou ? "" : " O PDF foi na versão simples, sem cores."), desenhou ? "ok" : "erro");
+      pendentes = pendentes.filter(function(p){ return String(p.id)!==String(idAtual); });
+      pendPintar();
+      setTimeout(function(){
+        if(pendAtual && String(pendAtual.id)===String(idAtual)){ pendEditor.hidden=true; pendAtual=null; }
+      }, 2200);
+    })
+    .catch(function(err){
+      pendMsg("Não foi possível reenviar: "+(err && err.message ? err.message : "falha de rede")+".", "erro");
+    })
+    .then(function(){
+      btnPendEnv.disabled=false;
+      btnPendEnv.textContent="Reenviar com o pagamento";
+    });
+  });
+
+  pendMontarFiltro();
+  pendPintar();
+  if(ENVIO_URL){ pendCarregar(); sugerirFicha(false); }
+
   /* ---------- memória dos cadastros ---------- */
   var CACHE_CAD="forneck_cadastros_v1";
 
   function dadosCadastro(){
-    return {itens:catalogo, atendentes:atendentes, capelas:capelas, cidadesExtra:cidadesExtra};
+    return {itens:catalogo, unidades:unidades, atendentes:atendentes, capelas:capelas, cidadesExtra:cidadesExtra};
   }
   function aplicarCadastro(j){
     if(!j) return false;
@@ -2593,6 +3173,12 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       });
       seq = catalogo.length;
     }
+    if(Array.isArray(j.unidades)){
+      unidades = j.unidades.map(function(u,i){
+        return {id:u.id||("u"+(i+1)), nome:u.nome||"", end:u.end||"", cidade:u.cidade||"", fone:u.fone||""};
+      });
+      seqU = unidades.length;
+    }
     if(Array.isArray(j.atendentes)){
       atendentes = j.atendentes.map(function(a,i){
         return {id:a.id||("a"+(i+1)), nome:a.nome||"", funcao:a.funcao||"", fone:a.fone||"", reg:a.reg||""};
@@ -2613,7 +3199,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     return true;
   }
   function redesenharTudo(){
-    renderCat(); renderAten(); renderCap(); renderSelectsFicha(); renderOS();
+    renderCat(); renderUni(); renderAten(); renderCap(); renderSelectsFicha(); renderOS();
   }
 
   function guardarLocal(){
@@ -2656,10 +3242,10 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   /* ---------- confirmação das alterações de cadastro ---------- */
   var barraPend=document.getElementById("barraPend"),
       pendTxt=document.getElementById("pendTxt");
-  var snapCad="", pendTimer=null, IGNORAR=["busca","filtroCat","buscaAten","buscaCap"];
+  var snapCad="", pendTimer=null, IGNORAR=["busca","filtroCat","buscaUni","buscaAten","buscaCap"];
 
   function assinaturaCad(){
-    return JSON.stringify([catalogo, atendentes, capelas, cidadesExtra]);
+    return JSON.stringify([catalogo, unidades, atendentes, capelas, cidadesExtra]);
   }
   function fixarCadastro(){
     snapCad=assinaturaCad();
@@ -2680,8 +3266,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   }
   function restaurarCadastro(){
     var d=JSON.parse(snapCad);
-    catalogo=d[0]; atendentes=d[1]; capelas=d[2]; cidadesExtra=d[3];
-    renderCat(); renderAten(); renderCap(); renderSelectsFicha(); renderOS();
+    catalogo=d[0]; unidades=d[1]; atendentes=d[2]; capelas=d[3]; cidadesExtra=d[4];
+    renderCat(); renderUni(); renderAten(); renderCap(); renderSelectsFicha(); renderOS();
     fixarCadastro();
   }
 
@@ -2692,7 +3278,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     });
   });
   panCad.addEventListener("click", function(e){
-    if(e.target.closest(".del,.mais,#btnAdd,#btnAddUrna,#btnAddAten,#btnAddCap,#btnImportCad")) revisarPendencia();
+    if(e.target.closest(".del,.mais,#btnAdd,#btnAddUrna,#btnAddUni,#btnAddAten,#btnAddCap,#btnImportCad")) revisarPendencia();
   });
 
   document.getElementById("btnDescartar").addEventListener("click", function(){
