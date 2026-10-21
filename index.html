@@ -147,6 +147,14 @@ h2,h3,p{margin:0}
 #painel-os tbody tr:hover td{background:#EDF5FA}
 #painel-os .row + .row{border-top-color:#D9E7EF}
 
+/* barra de sincronia dos cadastros */
+.cad-sinc{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-3)}
+.cad-status{flex:1;min-width:230px;font-size:11px;font-weight:600;line-height:1.5;color:var(--muted)}
+.cad-status.ok{color:var(--success)}
+.cad-status.aviso{color:var(--warning)}
+.cad-status.erro{color:var(--danger)}
+.cad-sinc .btn{padding:7px 17px;font-size:11.5px}
+
 /* cabeçalho da ficha: campos lado a lado */
 .headmeta .f{grid-column:span 3}
 .headmeta .f.hm-sm{grid-column:span 2}   /* 3+3+2+3+3 = 14 */
@@ -884,6 +892,11 @@ tr.meta-row:hover td{background:#F2F8FB}
     <button type="button" class="snav" role="tab" id="sn-cap"  aria-selected="false">Capelas</button>
   </div>
 
+  <div class="cad-sinc">
+    <span class="cad-status" id="cadStatus">Lendo os cadastros da planilha…</span>
+    <button type="button" class="btn btn-line" id="btnRecarregarCad">Recarregar da planilha</button>
+  </div>
+
   <!-- produtos -->
   <section class="card" id="cad-prod">
     <div class="card-head"><h3>Produtos e serviços</h3><span class="tag" id="tagProd">0 itens</span></div>
@@ -1244,8 +1257,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       document.getElementById(a[2]).hidden=!on;
       document.getElementById(a[3]).hidden=!on;
     });
-    if(qual==="os"){ renderSelectsFicha(); renderOS(); }
-    else if(qual==="cad"){ renderCat(); renderUni(); renderAten(); renderCap(); }
+    if(qual==="os"){ renderSelectsFicha(); renderOS(); sincronizarCadastros(); }
+    else if(qual==="cad"){ renderCat(); renderUni(); renderAten(); renderCap(); buscarCadastroRemoto(); }
     else if(qual==="pend" && typeof pendCarregar==="function"){ pendCarregar(); }
     window.scrollTo(0,0);
   }
@@ -2084,6 +2097,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     fichaAgente=""; fichaCapela=""; fichaUF=""; fichaCidade="";
     lanc={}; livres=[]; parcelas=[]; parEditado=false; selParcelas.value="1";
     pintarChips(); renderSelectsFicha(); renderOS();
+    sincronizarCadastros(true);
     sugerirFicha(true);
     selAgente.focus();
   });
@@ -3202,41 +3216,122 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     renderCat(); renderUni(); renderAten(); renderCap(); renderSelectsFicha(); renderOS();
   }
 
+  var cadStamp = "";   /* carimbo da versão dos cadastros que esta tela carregou */
+
   function guardarLocal(){
-    try{ localStorage.setItem(CACHE_CAD, JSON.stringify(dadosCadastro())); }catch(e){}
+    try{
+      var d=dadosCadastro();
+      d.gravadoEm=cadStamp;
+      localStorage.setItem(CACHE_CAD, JSON.stringify(d));
+    }catch(e){}
   }
   function lerLocal(){
     try{ var t=localStorage.getItem(CACHE_CAD); return t ? JSON.parse(t) : null; }catch(e){ return null; }
   }
 
-  function buscarCadastroRemoto(){
-    if(!ENVIO_URL) return;
-    fetch(ENVIO_URL+"?acao=cadastros", {method:"GET"})
-      .then(function(r){ return r.json(); })
-      .then(function(j){
-        if(j && j.ok && j.cadastros && Array.isArray(j.cadastros.itens) && j.cadastros.itens.length){
-          aplicarCadastro(j.cadastros);
-          guardarLocal();
-          redesenharTudo();
-          fixarCadastro();
-        }
-      })
-      .catch(function(){});
+  var cadStatusEl=document.getElementById("cadStatus");
+
+  function statusCad(txt, tipo){
+    if(!cadStatusEl) return;
+    cadStatusEl.textContent=txt;
+    cadStatusEl.className="cad-status"+(tipo?" "+tipo:"");
+  }
+  function quando(iso){
+    if(!iso) return "momento não registrado";
+    var d=new Date(iso);
+    if(isNaN(d.getTime())) return "momento não registrado";
+    var dd=function(n){ return ("0"+n).slice(-2); };
+    var hoje=new Date();
+    var mesmoDia = d.getDate()===hoje.getDate() && d.getMonth()===hoje.getMonth()
+                   && d.getFullYear()===hoje.getFullYear();
+    return (mesmoDia ? "hoje" : dd(d.getDate())+"/"+dd(d.getMonth()+1))
+           + " às " + dd(d.getHours())+":"+dd(d.getMinutes());
   }
 
-  function gravarCadastroRemoto(){
-    if(!ENVIO_URL) return Promise.resolve(false);
+  function buscarCadastroRemoto(){
+    if(!ENVIO_URL){
+      statusCad("A planilha não está configurada neste arquivo: os cadastros ficam só neste computador.", "erro");
+      return Promise.resolve(false);
+    }
+    if(haPendencia()){
+      statusCad("Você tem alterações não confirmadas. Confirme ou descarte antes de recarregar da planilha.", "aviso");
+      return Promise.resolve(false);
+    }
+    statusCad("Lendo os cadastros da planilha…", "");
+    return fetch(ENVIO_URL+"?acao=cadastros&t="+(new Date().getTime()), {method:"GET", cache:"no-store"})
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(!j || !j.ok) throw new Error((j && j.erro) || "resposta inesperada do servidor");
+        if(!j.cadastros){
+          cadStamp="";
+          statusCad("A planilha ainda não tem cadastros gravados. Os que estão aqui são deste computador — "
+                    + "clique em Confirmar alterações para enviá-los.", "aviso");
+          return false;
+        }
+        aplicarCadastro(j.cadastros);
+        cadStamp = j.cadastros.gravadoEm || "";
+        guardarLocal();
+        redesenharTudo();
+        fixarCadastro();
+        statusCad("Cadastros da planilha, gravados " + quando(cadStamp) + ".", "ok");
+        return true;
+      })
+      .catch(function(err){
+        statusCad("Não consegui ler a planilha (" + (err && err.message ? err.message : "falha de rede")
+                  + "). Mostrando os cadastros deste computador — não confirme alterações agora, "
+                  + "para não gravar por cima do que estiver lá.", "erro");
+        return false;
+      });
+  }
+
+  /* Releitura silenciosa, para quem só usa a ficha e não tem a senha dos cadastros.
+     Se nada mudou na planilha, não mexe em nada na tela. */
+  var ultimaSinc = 0, SINC_INTERVALO = 45000;
+
+  function sincronizarCadastros(forcar){
+    if(!ENVIO_URL) return;
+    if(haPendencia()) return;                 /* alguém está editando cadastros: não atropela */
+    var agora = new Date().getTime();
+    if(!forcar && agora - ultimaSinc < SINC_INTERVALO) return;
+    ultimaSinc = agora;
+
+    fetch(ENVIO_URL+"?acao=cadastros&t="+agora, {method:"GET", cache:"no-store"})
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(!j || !j.ok || !j.cadastros) return;
+        var novo = j.cadastros.gravadoEm || "";
+        if(novo && novo === cadStamp) return;   /* nada de novo: a tela fica como está */
+        if(haPendencia()) return;
+        aplicarCadastro(j.cadastros);
+        cadStamp = novo;
+        guardarLocal();
+        redesenharTudo();                       /* o que já estava lançado na ficha é preservado */
+        fixarCadastro();
+        statusCad("Cadastros da planilha, gravados "+quando(cadStamp)+".", "ok");
+        aviso("As listas de unidades, atendentes, capelas e itens foram atualizadas.", "ok");
+      })
+      .catch(function(){});                     /* sem rede, segue com o que já está na tela */
+  }
+
+  function gravarCadastroRemoto(forcar){
+    if(!ENVIO_URL) return Promise.resolve({ok:false, erro:"a planilha não está configurada neste arquivo"});
     return fetch(ENVIO_URL, {
       method:"POST",
       headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body: JSON.stringify({acao:"salvarCadastros", cadastros:dadosCadastro()})
+      body: JSON.stringify({
+        acao:"salvarCadastros",
+        cadastros:dadosCadastro(),
+        base: forcar ? "__forcar" : cadStamp     /* versão que esta tela carregou */
+      })
     })
     .then(function(r){ return r.text(); })
     .then(function(t){
       var j=null; try{ j=JSON.parse(t); }catch(e){}
-      return !!(j && j.ok);
+      if(j && j.ok){ cadStamp=j.gravadoEm||""; guardarLocal(); return {ok:true}; }
+      if(j && j.conflito) return {ok:false, conflito:true, gravadoEm:j.gravadoEm};
+      return {ok:false, erro:(j && j.erro) || "o servidor recusou a gravação"};
     })
-    .catch(function(){ return false; });
+    .catch(function(){ return {ok:false, erro:"falha de rede"}; });
   }
 
   /* ---------- confirmação das alterações de cadastro ---------- */
@@ -3285,8 +3380,9 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     if(!confirm("Descartar as alterações feitas desde a última confirmação?")) return;
     restaurarCadastro();
   });
-  document.getElementById("btnConfirmar").addEventListener("click", function(){
-    var b=this;
+  var btnConfirmar=document.getElementById("btnConfirmar");
+
+  function confirmarCadastros(forcar){
     fixarCadastro();
     guardarLocal();
     renderSelectsFicha(); renderOS();
@@ -3294,29 +3390,72 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     barraPend.hidden=false;
     barraPend.classList.remove("feito");
     pendTxt.textContent="Salvando os cadastros…";
-    b.disabled=true;
+    btnConfirmar.disabled=true;
 
-    gravarCadastroRemoto().then(function(ok){
-      b.disabled=false;
-      barraPend.classList.toggle("feito", ok);
-      pendTxt.textContent = ok
-        ? "Alterações confirmadas e salvas na planilha."
-        : "Alterações confirmadas neste aparelho, mas não consegui salvar na planilha.";
-      setTimeout(function(){ if(!haPendencia()) barraPend.hidden=true; }, ok?2600:7000);
+    gravarCadastroRemoto(forcar).then(function(r){
+      btnConfirmar.disabled=false;
+
+      if(r.ok){
+        barraPend.classList.add("feito");
+        pendTxt.textContent="Alterações confirmadas e salvas na planilha.";
+        statusCad("Cadastros da planilha, gravados "+quando(cadStamp)+" por este computador.", "ok");
+        setTimeout(function(){ if(!haPendencia()) barraPend.hidden=true; }, 2600);
+        return;
+      }
+
+      if(r.conflito){
+        barraPend.classList.remove("feito");
+        pendTxt.textContent="Outra pessoa salvou os cadastros enquanto você editava.";
+        statusCad("Outra pessoa gravou os cadastros "+quando(r.gravadoEm)
+                  +". Nada foi gravado por cima.", "aviso");
+        var porCima = confirm(
+            "Outra pessoa salvou alterações nos cadastros "+quando(r.gravadoEm)+", "
+          + "depois que esta tela carregou.\n\n"
+          + "OK — gravar a minha versão por cima da dela (as alterações dela se perdem).\n"
+          + "Cancelar — trazer a versão da planilha (as minhas alterações de agora se perdem).");
+        if(porCima){ confirmarCadastros(true); }
+        else { fixarCadastro(); buscarCadastroRemoto(); barraPend.hidden=true; }
+        return;
+      }
+
+      barraPend.classList.remove("feito");
+      pendTxt.textContent="Salvo neste aparelho, mas não na planilha: "+(r.erro||"falha")+".";
+      statusCad("A última gravação na planilha falhou ("+(r.erro||"falha")
+                +"). As alterações estão só neste computador.", "erro");
+      setTimeout(function(){ if(!haPendencia()) barraPend.hidden=true; }, 7000);
     });
+  }
+
+  btnConfirmar.addEventListener("click", function(){ confirmarCadastros(false); });
+
+  document.getElementById("btnRecarregarCad").addEventListener("click", function(){
+    if(haPendencia() && !confirm("Você tem alterações não confirmadas.\n\nRecarregar da planilha vai descartá-las. Continuar?")) return;
+    fixarCadastro();
+    buscarCadastroRemoto();
   });
 
   /* ===================== início ===================== */
   renderSelectsFicha();
   renderOS();
   renderCat();
+  renderUni();
   renderAten();
   renderCap();
 
   var local=lerLocal();
-  if(local && aplicarCadastro(local)) redesenharTudo();
+  if(local && aplicarCadastro(local)){
+    cadStamp = local.gravadoEm || "";
+    redesenharTudo();
+  }
   fixarCadastro();
   buscarCadastroRemoto();
+
+  /* mantém as listas em dia em quem deixa o sistema aberto o dia inteiro */
+  document.addEventListener("visibilitychange", function(){
+    if(!document.hidden) sincronizarCadastros();
+  });
+  window.addEventListener("focus", function(){ sincronizarCadastros(); });
+  setInterval(function(){ sincronizarCadastros(); }, 300000);
 })();
 </script>
 </body>
