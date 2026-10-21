@@ -65,7 +65,7 @@ h2,h3,p{margin:0}
 .toolbar .who .selo .pomba{width:20px}
 .toolbar .who b{font-weight:700;font-size:14.5px;letter-spacing:.01em;color:#fff;display:block}
 .toolbar .spacer{flex:1}
-.tabs{display:flex;gap:6px;padding-left:var(--space-4);border-left:1px solid rgba(191,226,242,.3)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;padding-left:var(--space-4);border-left:1px solid rgba(191,226,242,.3)}
 .tab{
   font:inherit;font-size:12.5px;font-weight:500;cursor:pointer;
   border:1.5px solid rgba(255,255,255,.35);background:transparent;color:var(--nuvem);
@@ -147,6 +147,24 @@ h2,h3,p{margin:0}
 #painel-os tbody tr:hover td{background:#EDF5FA}
 #painel-os .row + .row{border-top-color:#D9E7EF}
 
+/* fichas enviadas */
+#painel-env .card{background:var(--ficha-bg);border-color:var(--ficha-line)}
+#painel-env .card-head{border-bottom-color:var(--ficha-line)}
+#painel-env .card.card-accent{background:var(--nuvem);border-color:var(--ficha-line)}
+#painel-env .f input,#painel-env .f select{background-color:var(--surface);border-color:var(--ficha-line)}
+#painel-env .pend-item{cursor:default}
+#painel-env .grid{margin-bottom:var(--space-3)}
+.env-tab{margin-top:var(--space-2)}
+#painel-env .env-tab td{background:var(--surface);padding:7px 10px;font-size:12.5px;color:var(--azul-escuro)}
+#painel-env .env-tab td.n{text-align:center}
+#painel-env .env-tab td.v{text-align:right;font-variant-numeric:tabular-nums}
+#painel-env .env-tab td.tot{text-align:right;font-weight:600;color:var(--azul);font-variant-numeric:tabular-nums}
+#painel-env .env-tab tr:hover td{background:#EDF5FA}
+.env-rot{font-size:8.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:var(--space-3)}
+.env-itens-txt{font-size:12.5px;line-height:1.7;color:var(--azul-escuro);margin-top:4px}
+.env-total{text-align:right;font-size:13px;color:var(--muted);margin-top:var(--space-3)}
+.env-total b{font-size:18px;font-weight:600;color:var(--azul);margin-left:8px;font-variant-numeric:tabular-nums}
+
 /* barra de sincronia dos cadastros */
 .cad-sinc{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-3)}
 .cad-status{flex:1;min-width:230px;font-size:11px;font-weight:600;line-height:1.5;color:var(--muted)}
@@ -189,6 +207,8 @@ h2,h3,p{margin:0}
 .pi-dados{display:flex;flex-direction:column;gap:2px;flex:1;min-width:170px}
 .pi-dados b{font-size:14px;font-weight:600;color:var(--azul-escuro);overflow-wrap:anywhere}
 .pi-dados span{font-size:10.5px;color:var(--muted)}
+.pi-contr{font-size:11.5px;font-weight:500;color:var(--azul-escuro)}
+.pi-contr i{font-style:normal;color:var(--muted);font-weight:400}
 .pi-total{font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--azul);white-space:nowrap}
 .pend-resumo{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:var(--space-3);
@@ -638,6 +658,7 @@ tr.meta-row:hover td{background:#F2F8FB}
 
   <div class="tabs" role="tablist" aria-label="Seções">
     <button type="button" class="tab" role="tab" id="tab-os" aria-controls="painel-os" aria-selected="true">Ficha de atendimento</button>
+    <button type="button" class="tab" role="tab" id="tab-env" aria-controls="painel-env" aria-selected="false">Fichas enviadas</button>
     <button type="button" class="tab" role="tab" id="tab-pend" aria-controls="painel-pend" aria-selected="false">Pendências<span class="tab-badge" id="pendBadge" hidden></span></button>
     <button type="button" class="tab" role="tab" id="tab-cad" aria-controls="painel-cad" aria-selected="false">Cadastros</button>
   </div>
@@ -653,6 +674,10 @@ tr.meta-row:hover td{background:#F2F8FB}
     <button type="button" class="btn btn-outline" id="btnExportCad">Salvar cadastros</button>
     <button type="button" class="btn btn-mint" id="btnPrintCad">Imprimir lista</button>
     <button type="button" class="btn btn-ghost" id="btnBloquear" title="Sair dos cadastros">Bloquear</button>
+  </div>
+
+  <div class="actions" id="acoesEnv" hidden>
+    <button type="button" class="btn btn-mint" id="btnEnvRecarregar">Atualizar lista</button>
   </div>
 
   <div class="actions" id="acoesPend" hidden>
@@ -806,6 +831,42 @@ tr.meta-row:hover td{background:#F2F8FB}
     <button type="button" class="btn btn-line" id="btnVerPdf">Ver PDF</button>
     <button type="button" class="btn-enviar" id="btnEnviar">Enviar ficha de atendimento</button>
   </div>
+
+</main>
+
+<!-- ================= FICHAS ENVIADAS ================= -->
+<main class="sheet" id="painel-env" role="tabpanel" aria-labelledby="tab-env" hidden>
+
+  <section class="card">
+    <div class="card-head">
+      <h3>Fichas enviadas</h3>
+      <span class="tag" id="tagEnv">—</span>
+    </div>
+    <p class="pend-intro">
+      Escolha a sua unidade para ver os atendimentos já enviados por ela, do mais recente
+      para o mais antigo. Aqui é só consulta: abrir uma ficha não altera nada.
+    </p>
+    <div class="grid">
+      <label class="f s5"><span class="f-label">Unidade</span><select id="envUnidade"></select></label>
+      <label class="f s7"><span class="f-label">Buscar por falecido, contratante ou nº da ficha</span><input id="envBusca" placeholder="Digite parte do nome ou o número" autocomplete="off"></label>
+    </div>
+    <p class="pend-aviso" id="envAviso"></p>
+    <div class="pend-lista" id="envLista"></div>
+  </section>
+
+  <section class="card card-accent" id="envDetalhe" hidden>
+    <div class="card-head">
+      <h3 id="envTitulo">Ficha</h3>
+      <span class="tag" id="envSelo">—</span>
+    </div>
+    <div class="pend-resumo" id="envResumo"></div>
+    <div id="envItens"></div>
+    <div class="fim">
+      <span class="fim-nota" id="envNota"></span>
+      <button type="button" class="btn btn-line" id="btnEnvFechar">Fechar</button>
+      <button type="button" class="btn-enviar" id="btnEnvPdf">Ver PDF desta ficha</button>
+    </div>
+  </section>
 
 </main>
 
@@ -1236,13 +1297,14 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
 
   /* ===================== abas ===================== */
   var tabOS=document.getElementById("tab-os"), tabCad=document.getElementById("tab-cad"),
-      tabPend=document.getElementById("tab-pend");
+      tabPend=document.getElementById("tab-pend"), tabEnv=document.getElementById("tab-env");
   var panOS=document.getElementById("painel-os"), panCad=document.getElementById("painel-cad"),
       panPend=document.getElementById("painel-pend");
   var acOS=document.getElementById("acoesOS"), acCad=document.getElementById("acoesCad"),
       acPend=document.getElementById("acoesPend");
 
   var ABAS = [["os","tab-os","painel-os","acoesOS"],
+              ["env","tab-env","painel-env","acoesEnv"],
               ["pend","tab-pend","painel-pend","acoesPend"],
               ["cad","tab-cad","painel-cad","acoesCad"]];
 
@@ -1260,9 +1322,11 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     if(qual==="os"){ renderSelectsFicha(); renderOS(); sincronizarCadastros(); }
     else if(qual==="cad"){ renderCat(); renderUni(); renderAten(); renderCap(); buscarCadastroRemoto(); }
     else if(qual==="pend" && typeof pendCarregar==="function"){ pendCarregar(); }
+    else if(qual==="env"){ envEntrar(); }
     window.scrollTo(0,0);
   }
   tabOS.addEventListener("click", function(){ abrir("os"); });
+  tabEnv.addEventListener("click", function(){ abrir("env"); });
   tabPend.addEventListener("click", function(){ abrir("pend"); });
   tabCad.addEventListener("click", function(){
     if(cadLiberado) abrir("cad"); else pedirSenha();
@@ -2832,6 +2896,205 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
 
 
 
+  /* ============ fichas enviadas ============ */
+  var envUni     = document.getElementById("envUnidade"),
+      envBusca   = document.getElementById("envBusca"),
+      envAvisoEl = document.getElementById("envAviso"),
+      envListaEl = document.getElementById("envLista"),
+      envTagEl   = document.getElementById("tagEnv"),
+      envDet     = document.getElementById("envDetalhe"),
+      envTit     = document.getElementById("envTitulo"),
+      envSelo    = document.getElementById("envSelo"),
+      envResumo  = document.getElementById("envResumo"),
+      envItens   = document.getElementById("envItens"),
+      envNota    = document.getElementById("envNota"),
+      btnEnvPdf  = document.getElementById("btnEnvPdf");
+
+  var enviadas=[], envUnidadeAtual="", envBuscando=false, envAberta=null;
+
+  function envMsg(txt, tipo){
+    envAvisoEl.textContent=txt;
+    envAvisoEl.className="pend-aviso"+(tipo?" "+tipo:"");
+  }
+  function envMontarUnidades(){
+    var lista=unidades.filter(function(u){ return u.nome; }).map(function(u){ return u.nome; });
+    montarSelect(envUni, lista, envUni.value || fichaUnidade || "", "Selecione a unidade…");
+  }
+  function envEntrar(){
+    envMontarUnidades();
+    if(envUni.value && envUni.value!==envUnidadeAtual) envCarregar(true);
+    else envPintar();
+  }
+
+  function envCarregar(forcar){
+    var uni=envUni.value||"";
+    envDet.hidden=true; envAberta=null;
+    if(!uni){ enviadas=[]; envUnidadeAtual=""; envPintar(); envMsg("Escolha a unidade para ver as fichas.", ""); return; }
+    if(!ENVIO_URL){ envMsg("A planilha não está configurada neste arquivo.", "erro"); return; }
+    if(envBuscando) return;
+    if(!forcar && uni===envUnidadeAtual){ envPintar(); return; }
+
+    envBuscando=true;
+    envMsg("Buscando as fichas de "+uni+"…", "");
+    fetch(ENVIO_URL+"?acao=fichas&unidade="+encodeURIComponent(uni)+"&t="+(new Date().getTime()), {cache:"no-store"})
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(!j || j.ok===false) throw new Error((j && j.erro) || "resposta inesperada do servidor");
+        if(!Array.isArray(j.fichas))
+          throw new Error("publique a nova versão do Apps Script em Implantar › Gerenciar implantações");
+        enviadas=j.fichas; envUnidadeAtual=uni;
+        envMsg("", "");
+        envPintar();
+      })
+      .catch(function(err){
+        enviadas=[]; envUnidadeAtual="";
+        envPintar();
+        envMsg("Não consegui buscar as fichas ("+(err && err.message ? err.message : "falha de rede")+").", "erro");
+      })
+      .then(function(){ envBuscando=false; });
+  }
+
+  function envFiltradas(){
+    var t=envBusca.value.trim().toLowerCase();
+    if(!t) return enviadas;
+    return enviadas.filter(function(f){
+      return (f.falecido+" "+f.contratante+" "+f.ficha+" "+f.atendente).toLowerCase().indexOf(t)>=0;
+    });
+  }
+
+  function envPintar(){
+    var lista=envFiltradas();
+    envTagEl.textContent = !envUnidadeAtual ? "—"
+      : (lista.length===enviadas.length
+          ? (enviadas.length===1 ? "1 ficha" : enviadas.length+" fichas")
+          : lista.length+" de "+enviadas.length+" fichas");
+
+    if(!envUnidadeAtual){
+      envListaEl.innerHTML='<p class="vazio-msg">Escolha a unidade acima para ver as fichas.</p>';
+      return;
+    }
+    if(!lista.length){
+      envListaEl.innerHTML='<p class="vazio-msg">'
+        + (enviadas.length ? "Nenhuma ficha encontrada com esse texto."
+                           : "Esta unidade ainda não tem fichas enviadas.")+'</p>';
+      return;
+    }
+    envListaEl.innerHTML=lista.map(function(f){
+      return '<div class="pend-item" data-linha="'+esc(f.linha)+'">'
+        + '<div class="pi-dados">'
+        +   '<b>'+esc(f.falecido||"(sem nome)")+'</b>'
+        +   (f.contratante ? '<span class="pi-contr"><i>contratante</i> '+esc(f.contratante)+'</span>' : '')
+        +   '<span>'
+        +     (f.ficha ? '<span class="pi-uni">ficha '+esc(f.ficha)+'</span>' : '')
+        +     esc(f.data||"—")+' &nbsp;·&nbsp; '+esc(f.atendente||"sem atendente")
+        +     ' &nbsp;·&nbsp; '+esc(f.pagamento || "pagamento pendente")
+        +   '</span>'
+        + '</div>'
+        + '<div class="pi-total">R$ '+fmtBRL(pendNum(f.total))+'</div>'
+        + '<button type="button" class="btn btn-solid env-abrir">Abrir</button>'
+        + '</div>';
+    }).join("");
+  }
+
+  function envBuscarFicha(linha){
+    envMsg("Abrindo a ficha…", "");
+    fetch(ENVIO_URL+"?acao=ficha&linha="+encodeURIComponent(linha)+"&t="+(new Date().getTime()), {cache:"no-store"})
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(!j || !j.ok) throw new Error((j && j.erro) || "não consegui abrir a ficha");
+        envMsg("", "");
+        envMostrar(j);
+      })
+      .catch(function(err){
+        envMsg("Não consegui abrir a ficha ("+(err && err.message ? err.message : "falha de rede")+").", "erro");
+      });
+  }
+
+  function envMostrar(j){
+    envAberta=j;
+    var c=(j.ficha && j.ficha.campos) || {}, k=j.colunas || {};
+    function v(campo, coluna){
+      var a=String(c[campo]==null?"":c[campo]).trim();
+      return a || String(k[coluna]==null?"":k[coluna]).trim();
+    }
+    var sep=function(a,b){ a=a.trim(); b=b.trim(); return a&&b ? a+" às "+b : (a||b); };
+
+    envTit.textContent = v("falecido_nome","Falecido") || "Ficha";
+    envSelo.textContent = "ficha "+(v("ficha","Ficha nº") || "—");
+
+    envResumo.innerHTML =
+        pendResumoItem("Unidade", v("unidade","Unidade"))
+      + pendResumoItem("Atendimento", sep(v("data_atend","Data"), v("hora_atend","Horário")))
+      + pendResumoItem("Atendente", v("agente","Atendente"))
+      + pendResumoItem("Contratante", v("contratante","Contratante"))
+      + pendResumoItem("Telefone", v("telefone","Telefone"))
+      + pendResumoItem("Sepultamento", sep(v("cemiterio","Cemitério"), v("hora_sep","Sepultamento")))
+      + pendResumoItem("Pagamento", v("pagamento","Forma de pagamento") || "pendente")
+      + pendResumoItem("Enviada em", String(k["Recebido em"]||""));
+
+    var itens=(j.ficha && j.ficha.itens) || [];
+    var total = (j.ficha && typeof j.ficha.total==="number") ? j.ficha.total : pendNum(k["Total"]);
+
+    if(itens.length){
+      envItens.innerHTML =
+          '<div class="scroll-x"><table class="env-tab"><thead><tr>'
+        +   '<th>Item</th><th class="md">Modelo</th><th class="n">Qtd.</th>'
+        +   '<th class="v">Valor unit. R$</th><th class="v">Total R$</th>'
+        + '</tr></thead><tbody>'
+        + itens.map(function(i){
+            return '<tr><td>'+esc(i.item)+'</td><td>'+esc(i.modelo||"—")+'</td>'
+              + '<td class="n">'+fmtBRL(Number(i.qtd)||0)+'</td>'
+              + '<td class="v">'+fmtBRL(Number(i.valorUnit)||0)+'</td>'
+              + '<td class="tot">'+fmtBRL(Number(i.total)||0)+'</td></tr>';
+          }).join("")
+        + '</tbody></table></div>'
+        + '<div class="env-total">Total <b>R$ '+fmtBRL(total)+'</b></div>';
+    }else{
+      var txt=String(k["Itens"]||"").trim();
+      envItens.innerHTML = '<div class="env-rot">Itens</div>'
+        + '<p class="env-itens-txt">'+(txt ? esc(txt).split(" | ").join("<br>") : "—")+'</p>'
+        + '<div class="env-total">Total <b>R$ '+fmtBRL(total)+'</b></div>';
+    }
+
+    btnEnvPdf.disabled = !j.detalhada;
+    envNota.textContent = j.detalhada ? ""
+      : "Ficha enviada antes desta atualização: a planilha guardou o resumo, sem o detalhamento para remontar o PDF.";
+
+    envDet.hidden=false;
+    envDet.scrollIntoView({block:"start", behavior:"smooth"});
+  }
+
+  envUni.addEventListener("change", function(){ envCarregar(true); });
+  envBusca.addEventListener("input", function(){ envPintar(); });
+  envListaEl.addEventListener("click", function(e){
+    var b=e.target.closest(".env-abrir"); if(!b) return;
+    var it=b.closest(".pend-item");
+    if(it) envBuscarFicha(it.getAttribute("data-linha"));
+  });
+  document.getElementById("btnEnvFechar").addEventListener("click", function(){
+    envDet.hidden=true; envAberta=null;
+  });
+  document.getElementById("btnEnvRecarregar").addEventListener("click", function(){ envCarregar(true); });
+
+  btnEnvPdf.addEventListener("click", function(){
+    if(!envAberta || !envAberta.ficha) return;
+    var b=this;
+    b.disabled=true; b.textContent="Desenhando…";
+    envNota.textContent="Gerando o PDF desta ficha…";
+    gerarPdf(envAberta.ficha).then(function(pdf){
+      b.disabled=false; b.textContent="Ver PDF desta ficha";
+      if(!pdf){ envNota.textContent="Não consegui desenhar o PDF nesta página."; return; }
+      var bin=atob(pdf), buf=new Uint8Array(bin.length);
+      for(var i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
+      var url=URL.createObjectURL(new Blob([buf],{type:"application/pdf"}));
+      var a=document.createElement("a");
+      var num=(envAberta.ficha.campos && envAberta.ficha.campos.ficha) || envAberta.linha;
+      a.href=url; a.download="ficha-"+num+".pdf"; a.click();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+      envNota.textContent="PDF baixado.";
+    });
+  });
+
   /* ============ pendência de informação de pagamento ============ */
   var pendListaEl  = document.getElementById("pendLista"),
       pendEditor   = document.getElementById("pendEditor"),
@@ -2906,9 +3169,11 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       return;
     }
     pendListaEl.innerHTML = lista.map(function(p){
+      var contr = (p.ficha && p.ficha.campos && p.ficha.campos.contratante) || "";
       return '<div class="pend-item" data-id="'+esc(p.id)+'">'
         + '<div class="pi-dados">'
         +   '<b>'+esc(p.falecido||"(sem nome)")+'</b>'
+        +   (contr ? '<span class="pi-contr"><i>contratante</i> '+esc(contr)+'</span>' : '')
         +   '<span>'
         +     (p.unidade ? '<span class="pi-uni">'+esc(p.unidade)+'</span>' : '')
         +     (p.numero ? 'ficha '+esc(p.numero)+' &nbsp;·&nbsp; ' : '')
