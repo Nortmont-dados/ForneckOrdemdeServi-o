@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ficha de atendimento — Forneck Mattana</title>
+<title>Ficha de atendimento · Forneck Mattana</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -146,6 +146,49 @@ h2,h3,p{margin:0}
 #painel-os tbody td{background:var(--surface)}
 #painel-os tbody tr:hover td{background:#EDF5FA}
 #painel-os .row + .row{border-top-color:#D9E7EF}
+
+/* desconto */
+.btn-desconto{
+  font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:9px;margin-top:var(--space-4);
+  border:1.5px dashed var(--azul);border-radius:var(--r-pill);
+  background:var(--nuvem);color:var(--azul-escuro);padding:11px 24px;
+  transition:background .15s,border-color .15s;
+  print-color-adjust:exact;-webkit-print-color-adjust:exact;
+}
+.btn-desconto:hover{background:var(--ceu-claro);border-style:solid}
+.btn-desconto:focus-visible{outline:2px solid var(--azul-escuro);outline-offset:3px}
+.btn-desconto .sinal{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:21px;height:21px;flex:0 0 21px;border-radius:50%;
+  background:var(--azul);color:var(--nuvem);font-size:11.5px;font-weight:700;line-height:1;
+  print-color-adjust:exact;-webkit-print-color-adjust:exact;
+}
+.descline{
+  display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;
+  margin-top:var(--space-3);padding:var(--space-3) var(--space-4);
+  background:var(--surface);border:1.5px solid var(--ficha-line);border-radius:var(--r-lg);
+}
+.desc-rot{font-size:8.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.descline .chip{padding:4px 13px;font-size:11px}
+.desc-val{
+  font:inherit;font-size:13px;font-weight:500;color:var(--azul-escuro);text-align:right;
+  background:var(--surface);border:1.5px solid var(--ficha-line);border-radius:var(--r-input);
+  padding:6px 10px;width:120px;font-variant-numeric:tabular-nums;
+}
+.desc-val:focus{outline:2px solid var(--azul-escuro);border-color:var(--azul-escuro)}
+.desc-eq{font-size:11px;font-weight:600;color:var(--success);min-width:90px}
+.descline .del{margin-left:auto}
+.totalbox .subline{
+  display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-3);
+  font-size:11px;color:var(--ceu-claro);padding-bottom:4px;
+}
+.totalbox .subline b{font-size:12.5px;font-weight:600;color:var(--nuvem);font-variant-numeric:tabular-nums}
+
+/* formas de pagamento combinadas */
+.formas{margin-top:var(--space-3);border-top:1px solid var(--ficha-line);padding-top:var(--space-2)}
+.par-tab td.fp-nome{font-size:11.5px;font-weight:500;color:var(--azul-escuro);white-space:nowrap;width:1%}
+#painel-os .par-tab td.fp-nome,#painel-pend .par-tab td.fp-nome{padding:0 12px 0 2px}
 
 /* fichas enviadas */
 #painel-env .card{background:var(--ficha-bg);border-color:var(--ficha-line)}
@@ -615,7 +658,8 @@ tr.meta-row:hover td{background:#F2F8FB}
 @page{size:A4;margin:9mm}
 @media print{
   body{background:#fff;font-size:11.5px}
-  .toolbar,.catbar,.subnav,.addline,.par-btn,.fim,.dica-rolagem,.pendencia,.del,th.rm,td.rm{display:none!important}
+  .toolbar,.catbar,.subnav,.addline,.par-btn,.fim,.dica-rolagem,.pendencia,.del,th.rm,td.rm,
+  .btn-desconto{display:none!important}
   #painel-cad{padding-bottom:0}
   select.p-mod,.nomod{display:none!important}
   #osBody tr.nao-sel{display:none!important}
@@ -786,19 +830,45 @@ tr.meta-row:hover td{background:#F2F8FB}
       <button type="button" class="btn btn-line" id="btnAddLivre">+ Outros serviços</button>
     </div>
 
+    <button type="button" class="btn-desconto" id="btnDesconto">
+      <span class="sinal">%</span>Aplicar desconto
+    </button>
+
+    <div class="descline" id="blocoDesconto" hidden>
+      <span class="desc-rot">Desconto</span>
+      <div class="chips">
+        <label class="chip on"><input type="radio" name="desconto_tipo" value="R$" checked>R$</label>
+        <label class="chip"><input type="radio" name="desconto_tipo" value="%">%</label>
+      </div>
+      <input id="descValor" name="desconto" class="desc-val" inputmode="decimal" placeholder="0,00" aria-label="Valor do desconto">
+      <span class="desc-eq" id="descEquiv"></span>
+      <button type="button" class="del" id="btnTirarDesconto" title="Tirar o desconto" aria-label="Tirar o desconto">&times;</button>
+    </div>
+
     <div class="fecho">
       <div>
       <div class="grid" style="align-content:start">
         <div class="f s12">
           <span class="f-label">Forma de pagamento</span>
           <div class="chips" style="padding-top:2px">
-            <label class="chip"><input type="radio" name="pagamento" value="Cartão de crédito">Cartão de crédito</label>
-            <label class="chip"><input type="radio" name="pagamento" value="Cartão de débito">Cartão de débito</label>
-            <label class="chip"><input type="radio" name="pagamento" value="Pix">Pix</label>
-            <label class="chip"><input type="radio" name="pagamento" value="Boleto">Boleto</label>
-            <label class="chip"><input type="radio" name="pagamento" value="Dinheiro">Dinheiro</label>
+            <label class="chip"><input type="checkbox" name="pagamento" value="Cartão de crédito">Cartão de crédito</label>
+            <label class="chip"><input type="checkbox" name="pagamento" value="Cartão de débito">Cartão de débito</label>
+            <label class="chip"><input type="checkbox" name="pagamento" value="Pix">Pix</label>
+            <label class="chip"><input type="checkbox" name="pagamento" value="Boleto">Boleto</label>
+            <label class="chip"><input type="checkbox" name="pagamento" value="Dinheiro">Dinheiro</label>
+            <label class="chip"><input type="checkbox" name="pagamento" value="Seguradora">Seguradora</label>
           </div>
-          <span class="dica-pag">Ainda não definido? Pode enviar em branco — a ficha fica na aba <b>Pendências</b> até o pagamento ser informado.</span>
+
+          <div class="formas" id="formasPag" hidden>
+            <div class="par-head">
+              <span>Quanto em cada forma</span>
+              <button type="button" class="par-btn" id="btnFormasDividir">Dividir igualmente</button>
+            </div>
+            <table class="par-tab"><tbody id="formasBody"></tbody></table>
+            <p class="par-status" id="formasStatus"></p>
+          </div>
+
+          <span class="dica-pag">Pode marcar mais de uma forma: aparece um campo para o valor de cada uma. Ainda não definido? Pode enviar em branco, que a ficha fica na aba <b>Pendências</b> até o pagamento ser informado.</span>
         </div>
         <label class="f s4"><span class="f-label">Parcelas</span><select name="parcelas" id="selParcelas"></select></label>
         <label class="f s4"><span class="f-label">Vencimento da 1ª</span><input class="data" name="vencimento" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off"></label>
@@ -816,6 +886,8 @@ tr.meta-row:hover td{background:#F2F8FB}
       </div>
 
       <div class="totalbox">
+        <div class="subline" id="linhaSub" hidden><span>Subtotal</span><b id="subtotal">0,00</b></div>
+        <div class="subline" id="linhaDesc" hidden><span>Desconto</span><b id="descAplicado">0,00</b></div>
         <div class="line">
           <span class="lbl">Total</span>
           <span class="val"><small>R$</small><span id="total">0,00</span></span>
@@ -884,7 +956,7 @@ tr.meta-row:hover td{background:#F2F8FB}
       <b>ATUALIZAÇÃO FORMA DE PAGAMENTO</b> e o nome do falecido, e a planilha é atualizada.
     </p>
     <p class="pend-aviso" id="pendAviso"></p>
-    <label class="f pend-filtro"><span class="f-label">Filtrar por unidade</span><select id="pendFiltroUni"></select></label>
+    <label class="f pend-filtro"><span class="f-label">Unidade</span><select id="pendFiltroUni"></select></label>
     <div class="pend-lista" id="pendLista"></div>
   </section>
 
@@ -902,11 +974,21 @@ tr.meta-row:hover td{background:#F2F8FB}
           <div class="f s12">
             <span class="f-label">Forma de pagamento</span>
             <div class="chips" style="padding-top:2px">
-              <label class="chip"><input type="radio" name="p_pagamento" value="Cartão de crédito">Cartão de crédito</label>
-              <label class="chip"><input type="radio" name="p_pagamento" value="Cartão de débito">Cartão de débito</label>
-              <label class="chip"><input type="radio" name="p_pagamento" value="Pix">Pix</label>
-              <label class="chip"><input type="radio" name="p_pagamento" value="Boleto">Boleto</label>
-              <label class="chip"><input type="radio" name="p_pagamento" value="Dinheiro">Dinheiro</label>
+              <label class="chip"><input type="checkbox" name="p_pagamento" value="Cartão de crédito">Cartão de crédito</label>
+              <label class="chip"><input type="checkbox" name="p_pagamento" value="Cartão de débito">Cartão de débito</label>
+              <label class="chip"><input type="checkbox" name="p_pagamento" value="Pix">Pix</label>
+              <label class="chip"><input type="checkbox" name="p_pagamento" value="Boleto">Boleto</label>
+              <label class="chip"><input type="checkbox" name="p_pagamento" value="Dinheiro">Dinheiro</label>
+              <label class="chip"><input type="checkbox" name="p_pagamento" value="Seguradora">Seguradora</label>
+            </div>
+
+            <div class="formas" id="pFormasPag" hidden>
+              <div class="par-head">
+                <span>Quanto em cada forma</span>
+                <button type="button" class="par-btn" id="btnPFormasDividir">Dividir igualmente</button>
+              </div>
+              <table class="par-tab"><tbody id="pFormasBody"></tbody></table>
+              <p class="par-status" id="pFormasStatus"></p>
             </div>
           </div>
           <label class="f s4"><span class="f-label">Parcelas</span><select id="pendParcelas"></select></label>
@@ -1100,7 +1182,7 @@ tr.meta-row:hover td{background:#F2F8FB}
 
 <script>
 /* =========================================================================
-   CONFIGURAÇÃO DO ENVIO  —  preencha as duas linhas abaixo
+   CONFIGURAÇÃO DO ENVIO: preencha as duas linhas abaixo
 
    1. Abra script.google.com e cole o conteúdo de "envio-ordem-servico.gs"
    2. Implantar > Nova implantação > App da Web
@@ -1196,13 +1278,13 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   var seqA = 1;
 
   var unidades = [
-    {id:"u1", nome:"Montenegro", end:"Av. Ernesto Popp, 148 — Cinco de Maio", cidade:"Montenegro/RS", fone:"(51) 3632-2202"}
+    {id:"u1", nome:"Montenegro", end:"Av. Ernesto Popp, 148, Cinco de Maio", cidade:"Montenegro/RS", fone:"(51) 3632-2202"}
   ];
   var seqU = 1;
 
   var capelas = [
     {id:"c1", nome:"Capela de Ouro Branco",  end:"", cidade:"Ouro Branco/RS", fone:""},
-    {id:"c2", nome:"Capela Forneck Mattana", end:"Av. Ernesto Popp, 148 — Cinco de Maio", cidade:"Montenegro/RS", fone:"(51) 3632-2202"}
+    {id:"c2", nome:"Capela Forneck Mattana", end:"Av. Ernesto Popp, 148, Cinco de Maio", cidade:"Montenegro/RS", fone:"(51) 3632-2202"}
   ];
   var seqC = 2;
 
@@ -1676,11 +1758,11 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     var dif=Math.round((somaPar-soma)*100)/100;
     if(!(soma>0) && somaPar===0){ parStatus.textContent=""; parStatus.className="par-status"; return; }
     if(Math.abs(dif)<0.005){
-      parStatus.textContent="Soma das parcelas: R$ "+fmtBRL(somaPar)+" — confere com o total.";
+      parStatus.textContent="Soma das parcelas: R$ "+fmtBRL(somaPar)+". Confere com o total.";
       parStatus.className="par-status ok";
     }else{
-      parStatus.textContent="Soma das parcelas: R$ "+fmtBRL(somaPar)+" — "
-        + (dif<0 ? "faltam R$ "+fmtBRL(-dif) : "excede em R$ "+fmtBRL(dif))+".";
+      parStatus.textContent="Soma das parcelas: R$ "+fmtBRL(somaPar)+". "
+        + (dif<0 ? "Faltam R$ "+fmtBRL(-dif) : "Excede em R$ "+fmtBRL(dif))+".";
       parStatus.className="par-status erro";
     }
   }
@@ -1718,25 +1800,216 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     parcelas.forEach(function(pr,i){ pr.venc=datas[i]||pr.venc; });
     pintarParcelas();
   });
-  document.addEventListener("change", function(e){
-    if(e.target.name!=="pagamento") return;
-    if(["Pix","Cartão de débito","Dinheiro"].indexOf(e.target.value)>=0){
-      selParcelas.value="1";
-      montarParcelas(totalAtual(), true);
+  /* ============ formas de pagamento: pode ser mais de uma ============
+     Uma só forma funciona como antes. Com duas ou mais, aparece um campo de
+     valor para cada uma e a soma é conferida contra o total da ficha. */
+  /* formas que não têm parcelamento: ao marcar só essas, o número de parcelas volta para 1 */
+  var FORMAS_A_VISTA = ["Pix","Cartão de débito","Dinheiro","Seguradora"];
+
+  function criarFormas(campo, idBloco, idBody, idStatus, idDividir, totalDe, aoMudar){
+    var bloco=document.getElementById(idBloco),
+        corpo=document.getElementById(idBody),
+        stat =document.getElementById(idStatus),
+        btn  =document.getElementById(idDividir);
+    var valores={}, editado=false;
+
+    function caixas(){ return document.querySelectorAll('[name="'+campo+'"]'); }
+    function lista(){
+      var r=[];
+      caixas().forEach(function(c){ if(c.checked) r.push(c.value); });
+      return r;
     }
+    function repartir(){
+      var l=lista(), cent=Math.round(totalDe()*100), n=l.length||1;
+      var b=Math.floor(cent/n), resto=cent-b*n;
+      valores={};
+      l.forEach(function(f,i){ valores[f]=fmtBRL((i===0 ? b+resto : b)/100); });
+      editado=false;
+    }
+    function soma(){
+      return lista().reduce(function(a,f){ return a+parseBRL(valores[f]||0); },0);
+    }
+    function verStatus(){
+      var l=lista();
+      if(l.length<2){ stat.textContent=""; stat.className="par-status"; return; }
+      var s=soma(), tot=totalDe(), dif=Math.round((s-tot)*100)/100;
+      if(Math.abs(dif)<0.005){
+        stat.textContent="Soma das formas: R$ "+fmtBRL(s)+". Confere com o total.";
+        stat.className="par-status ok";
+      }else{
+        stat.textContent="Soma das formas: R$ "+fmtBRL(s)+". "
+          + (dif<0 ? "Faltam R$ "+fmtBRL(-dif) : "Excede em R$ "+fmtBRL(dif))+".";
+        stat.className="par-status erro";
+      }
+    }
+    function pintar(){
+      var l=lista();
+      bloco.hidden = l.length<2;
+      if(l.length>=2){
+        corpo.innerHTML = l.map(function(f){
+          return '<tr data-forma="'+esc(f)+'">'
+            + '<td class="fp-nome">'+esc(f)+'</td>'
+            + '<td><input class="pr-val fp-val" value="'+esc(valores[f]||"")+'" inputmode="decimal" placeholder="0,00" aria-label="Valor em '+esc(f)+'"></td>'
+            + '</tr>';
+        }).join("");
+      }
+      verStatus();
+    }
+    function trocou(){
+      var l=lista();
+      if(l.length<2){ valores={}; editado=false; }
+      else if(!editado) repartir();
+      else l.forEach(function(f){ if(valores[f]===undefined) valores[f]=fmtBRL(0); });
+      pintar();
+      if(typeof aoMudar==="function") aoMudar();
+    }
+
+    caixas().forEach(function(c){ c.addEventListener("change", trocou); });
+    corpo.addEventListener("input", function(e){
+      var tr=e.target.closest("tr"); if(!tr) return;
+      valores[tr.getAttribute("data-forma")]=e.target.value;
+      editado=true;
+      verStatus();
+    });
+    corpo.addEventListener("blur", function(e){
+      if(!e.target.classList || !e.target.classList.contains("fp-val")) return;
+      var tr=e.target.closest("tr"); if(!tr) return;
+      var f=tr.getAttribute("data-forma");
+      if(String(valores[f]||"").trim()){
+        valores[f]=fmtBRL(parseBRL(valores[f]));
+        e.target.value=valores[f];
+        verStatus();
+      }
+    }, true);
+    btn.addEventListener("click", function(){ repartir(); pintar(); });
+
+    return {
+      lista: lista,
+      texto: function(){
+        var l=lista();
+        if(!l.length) return "";
+        if(l.length===1) return l[0];
+        return l.map(function(f){ return f+" R$ "+fmtBRL(parseBRL(valores[f]||0)); }).join(" + ");
+      },
+      detalhe: function(){
+        var l=lista();
+        if(!l.length) return [];
+        if(l.length===1) return [{forma:l[0], valor:totalDe()}];
+        return l.map(function(f){ return {forma:f, valor:parseBRL(valores[f]||0)}; });
+      },
+      ok: function(){
+        var l=lista();
+        if(l.length<2) return true;
+        return Math.abs(soma()-totalDe())<0.005;
+      },
+      aVista: function(){
+        var l=lista();
+        if(!l.length) return false;
+        for(var i=0;i<l.length;i++) if(FORMAS_A_VISTA.indexOf(l[i])<0) return false;
+        return true;
+      },
+      recalcular: function(){ if(!editado) repartir(); pintar(); },
+      limpar: function(){
+        caixas().forEach(function(c){ c.checked=false; });
+        valores={}; editado=false; pintar();
+      },
+      aplicar: function(det, texto){
+        var mapa={}, k;
+        if(Object.prototype.toString.call(det)==="[object Array]" && det.length){
+          det.forEach(function(p){ if(p && p.forma) mapa[p.forma]=fmtBRL(Number(p.valor)||0); });
+        }else if(String(texto||"").trim()){
+          mapa[String(texto).trim()]=fmtBRL(totalDe());
+        }
+        var quantas=0;
+        caixas().forEach(function(c){
+          c.checked = Object.prototype.hasOwnProperty.call(mapa, c.value);
+          if(c.checked) quantas++;
+        });
+        valores={};
+        for(k in mapa) if(Object.prototype.hasOwnProperty.call(mapa,k)) valores[k]=mapa[k];
+        editado = quantas>1;
+        pintar();
+      }
+    };
+  }
+
+  var formasOS = criarFormas("pagamento","formasPag","formasBody","formasStatus","btnFormasDividir",
+    totalAtual,
+    function(){
+      if(formasOS.aVista()){
+        selParcelas.value="1";
+        montarParcelas(totalAtual(), true);
+      }
+    });
+
+  /* ---------- desconto: em reais ou em porcentagem ---------- */
+  var blocoDesconto=document.getElementById("blocoDesconto"),
+      descValor=document.getElementById("descValor"),
+      descEquiv=document.getElementById("descEquiv"),
+      elSub=document.getElementById("subtotal"),
+      elDescAplicado=document.getElementById("descAplicado"),
+      linhaSub=document.getElementById("linhaSub"),
+      linhaDesc=document.getElementById("linhaDesc");
+
+  function descTipo(){
+    var r=document.querySelector('[name="desconto_tipo"]:checked');
+    return r ? r.value : "R$";
+  }
+  function descEmReais(sub){
+    if(blocoDesconto.hidden) return 0;
+    var v=parseBRL(descValor.value);
+    if(!(v>0)) return 0;
+    var d = descTipo()==="%" ? sub*v/100 : v;
+    d = Math.round(d*100)/100;
+    return Math.min(d, sub);          /* nunca passa do subtotal */
+  }
+
+  document.getElementById("btnDesconto").addEventListener("click", function(){
+    blocoDesconto.hidden=false;
+    this.hidden=true;
+    descValor.focus();
+    recalc();
+  });
+  document.getElementById("btnTirarDesconto").addEventListener("click", function(){
+    blocoDesconto.hidden=true;
+    document.getElementById("btnDesconto").hidden=false;
+    descValor.value="";
+    recalc();
+  });
+  descValor.addEventListener("input", function(){ recalc(); });
+  descValor.addEventListener("blur", function(){
+    if(descTipo()==="R$" && descValor.value.trim()) descValor.value=fmtBRL(parseBRL(descValor.value));
+    recalc();
+  });
+  document.querySelectorAll('[name="desconto_tipo"]').forEach(function(r){
+    r.addEventListener("change", function(){ recalc(); });
   });
 
   function recalc(){
-    var soma=0;
+    var sub=0;
     catalogo.forEach(function(it){
       var l=lanc[it.id]; if(!l || !l.sel) return;
-      soma += qtdEfetiva(l)*parseBRL(l.vu);
+      sub += qtdEfetiva(l)*parseBRL(l.vu);
     });
-    livres.forEach(function(l){ if(l.sel) soma += qtdEfetiva(l)*parseBRL(l.vu); });
+    livres.forEach(function(l){ if(l.sel) sub += qtdEfetiva(l)*parseBRL(l.vu); });
+
+    var desc=descEmReais(sub);
+    var soma=Math.round((sub-desc)*100)/100;
+
+    elSub.textContent=fmtBRL(sub);
+    elDescAplicado.textContent=fmtBRL(desc);
+    linhaSub.hidden = !(desc>0);
+    linhaDesc.hidden = !(desc>0);
+    descEquiv.textContent = (!blocoDesconto.hidden && descTipo()==="%" && desc>0)
+      ? "= R$ "+fmtBRL(desc) : "";
+
     elTotal.textContent = fmtBRL(soma);
     elExtenso.textContent = soma>0 ? porExtenso(soma)+"." : "";
     montarParcelas(soma, !parEditado);
+    if(formasOS) formasOS.recalcular();
   }
+  function subtotalAtual(){ return parseBRL(elSub.textContent); }
+  function descontoAtual(){ return parseBRL(elDescAplicado.textContent); }
 
   osBody.addEventListener("change", function(e){
     if(e.target.classList.contains("p-sel")){
@@ -2154,12 +2427,14 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   document.getElementById("btnClear").addEventListener("click", function(){
     if(!confirm("Limpar todos os campos e começar uma ficha em branco? Os cadastros são mantidos.")) return;
     camposFicha().forEach(function(el){
-      if(el.type==="radio") el.checked=false;
+      if(el.type==="radio" || el.type==="checkbox") el.checked=false;
       else if(el.tagName==="SELECT") el.value="";
       else el.value="";
     });
     fichaAgente=""; fichaCapela=""; fichaUF=""; fichaCidade="";
     lanc={}; livres=[]; parcelas=[]; parEditado=false; selParcelas.value="1";
+    formasOS.limpar();
+    blocoDesconto.hidden=true; document.getElementById("btnDesconto").hidden=false; descValor.value="";
     pintarChips(); renderSelectsFicha(); renderOS();
     sincronizarCadastros(true);
     sugerirFicha(true);
@@ -2567,7 +2842,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   function preenchido(nome){
     var els=elementosDe(nome);
     if(!els.length) return true;
-    if(els[0].type==="radio"){
+    if(els[0].type==="radio" || els[0].type==="checkbox"){
       for(var i=0;i<els.length;i++) if(els[i].checked) return true;
       return false;
     }
@@ -2648,6 +2923,16 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         + '</tr>';
     }).join("");
 
+    var formasPdf=(d.pagamentos||[]).filter(function(p){ return p && p.forma; });
+    var blocoFormas = formasPdf.length>1
+      ? '<table style="width:100%;border-collapse:collapse;margin:1px 0 10px">'
+        + formasPdf.map(function(p){
+            return '<tr><td style="font-size:10pt;color:'+PDF_TINTA+';padding:1px 0">'+esc(p.forma)+'</td>'
+              + '<td style="font-size:10pt;color:'+PDF_TINTA+';padding:1px 0;text-align:right">R$ '+fmtBRL(Number(p.valor)||0)+'</td></tr>';
+          }).join("")+'</table>'
+      : '<div style="font-size:10pt;color:'+PDF_TINTA+';padding:1px 0 10px">'+esc(ouPdf(c.pagamento))
+        + (Number(c.parcelas)>1 ? '  ·  '+esc(c.parcelas)+'x' : '')+'</div>';
+
     var th='font-size:7pt;letter-spacing:.14em;font-weight:700;color:#fff;background:'+PDF_AZUL+';padding:6px 10px;';
     var parcelas=(d.parcelas||[]).filter(function(p){ return p.valor>0; });
     var blocoPar = parcelas.length ? pdfRotulo("Parcelamento")
@@ -2716,8 +3001,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       + '<table style="width:100%;border-collapse:collapse;margin-top:14px"><tr>'
       +   '<td style="width:52%;vertical-align:top;padding-right:14px">'
       +     pdfRotulo("Forma de pagamento")
-      +     '<div style="font-size:10pt;color:'+PDF_TINTA+';padding:1px 0 10px">'+esc(ouPdf(c.pagamento))
-      +       (Number(c.parcelas)>1 ? '  ·  '+esc(c.parcelas)+'x' : '')+'</div>'
+      +     blocoFormas
       +     blocoPar
       +     (String(c.duplicata||"").trim()
           ? pdfRotulo("Nota / duplicata")+'<div style="font-size:10pt;color:'+PDF_TINTA+'">'+esc(c.duplicata)+'</div>'
@@ -2725,6 +3009,10 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       +   '</td>'
       +   '<td style="width:48%;vertical-align:top">'
       +     '<div style="background:'+PDF_AZUL+';color:#fff;padding:12px 14px">'
+      +       (Number(d.desconto)>0
+                 ? '<div style="font-size:8pt;opacity:.85;padding-bottom:3px">Subtotal &nbsp; R$ '+fmtBRL(Number(d.subtotal)||0)+'</div>'
+                   + '<div style="font-size:8pt;opacity:.85;padding-bottom:7px">Desconto &nbsp; R$ '+fmtBRL(Number(d.desconto))+'</div>'
+                 : '')
       +       '<div style="font-size:7pt;letter-spacing:.25em">TOTAL</div>'
       +       '<div style="font-size:20pt;font-weight:700;padding-top:2px">R$ '+fmtBRL(d.total)+'</div>'
       +       (d.extenso ? '<div style="font-size:7.5pt;padding-top:6px;line-height:1.45;opacity:.92">'+esc(d.extenso)+'</div>' : '')
@@ -2734,7 +3022,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
 
       + '<div style="border-top:1px solid '+PDF_LINHA+';margin-top:22px;padding-top:9px;font-size:7.5pt;color:'+PDF_CINZA+';line-height:1.6">'
       +   '<b style="color:'+PDF_TINTA+'">Serviços Funerários Forneck Mattana Ltda</b><br>'
-      +   'Av. Ernesto Popp, 148 — Cinco de Maio, Montenegro/RS &nbsp;·&nbsp; Fone (51) 3632-2202 &nbsp;·&nbsp; CNPJ 25.117.295/0001-01'
+      +   'Av. Ernesto Popp, 148, Cinco de Maio, Montenegro/RS &nbsp;·&nbsp; Fone (51) 3632-2202 &nbsp;·&nbsp; CNPJ 25.117.295/0001-01'
       + '</div>'
 
       + '</div></div>';
@@ -2779,6 +3067,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   function coletarFicha(){
     var campos={};
     camposFicha().forEach(function(el){
+      if(el.type==="checkbox") return;                 /* formas de pagamento: tratadas abaixo */
       if(el.type==="radio"){ if(el.checked) campos[el.name]=el.value; }
       else campos[el.name]=el.value;
     });
@@ -2794,10 +3083,13 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       var q=qtdEfetiva(l), vu=parseBRL(l.vu);
       itens.push({item:(l.d||"Outros serviços"), modelo:"", unidade:"", qtd:q, valorUnit:vu, total:q*vu});
     });
-    if(campos.pagamento===undefined) campos.pagamento="";
+    campos.pagamento = formasOS.texto();
     return {
       campos:campos,
+      pagamentos: formasOS.detalhe(),
       itens:itens,
+      subtotal: subtotalAtual() || parseBRL(elTotal.textContent),
+      desconto: descontoAtual(),
       total:parseBRL(elTotal.textContent),
       extenso:elExtenso.textContent,
       parcelas:parcelas.map(function(pr){ return {venc:pr.venc, valor:parseBRL(pr.valor)}; }),
@@ -2852,6 +3144,10 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     var dados=coletarFicha();
     if(EXIGIR_ITENS && !dados.itens.length){
       aviso("Marque pelo menos um produto ou serviço antes de enviar.", "erro");
+      return;
+    }
+    if(!formasOS.ok()){
+      aviso("A soma das formas de pagamento não fecha com o total. Ajuste os valores.", "erro");
       return;
     }
     if(EXIGIR_PARCELAS && dados.total>0 && String(dados.campos.pagamento||"").trim()){
@@ -3139,23 +3435,29 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     pendBadgeEl.hidden = !n;
   }
 
+  var pendFiltroEscolhido=false;   /* true depois que a pessoa escolhe a unidade na mão */
+
   function pendUnidades(){
     var vistas=[];
-    pendentes.forEach(function(p){
+    unidades.forEach(function(u){
+      if(u.nome && vistas.indexOf(u.nome)<0) vistas.push(u.nome);
+    });
+    pendentes.forEach(function(p){                 /* unidades que saíram de uso continuam listadas */
       var u=String(p.unidade||"").trim();
       if(u && vistas.indexOf(u)<0) vistas.push(u);
     });
     return vistas.sort(function(a,b){ return a.localeCompare(b,"pt-BR"); });
   }
   function pendMontarFiltro(){
-    var atual=pendFiltro.value||"", lista=pendUnidades();
+    var lista=pendUnidades(), atual=pendFiltro.value||"";
+    if(!pendFiltroEscolhido && !atual && fichaUnidade && lista.indexOf(fichaUnidade)>=0)
+      atual=fichaUnidade;                          /* começa na unidade deste computador */
     var h='<option value="">Todas as unidades</option>';
     lista.forEach(function(u){
       h += '<option value="'+esc(u)+'"'+(u===atual?" selected":"")+'>'+esc(u)+'</option>';
     });
     pendFiltro.innerHTML=h;
-    pendFiltro.parentNode.hidden = lista.length<2;
-    if(lista.indexOf(atual)<0) pendFiltro.value="";
+    pendFiltro.value = lista.indexOf(atual)>=0 ? atual : "";
   }
 
   function pendPintar(){
@@ -3164,7 +3466,10 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     pendContador(lista.length);
     if(!lista.length){
       pendListaEl.innerHTML='<p class="vazio-msg">'
-        + (pendentes.length ? "Nenhuma ficha pendente nesta unidade." : "Nenhuma ficha com pagamento pendente.")
+        + (pendentes.length
+            ? "Nenhuma ficha pendente em "+esc(filtro)+". Escolha outra unidade ou "
+              + "\"Todas as unidades\" para ver as "+pendentes.length+" que estão esperando."
+            : "Nenhuma ficha com pagamento pendente.")
         + '</p>';
       return;
     }
@@ -3185,7 +3490,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         + '</div>';
     }).join("");
   }
-  pendFiltro.addEventListener("change", pendPintar);
+  pendFiltro.addEventListener("change", function(){ pendFiltroEscolhido=true; pendPintar(); });
 
   function pendCarregar(){
     if(!ENVIO_URL){
@@ -3248,11 +3553,11 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     var dif=Math.round((s-soma)*100)/100;
     if(!(soma>0) && s===0){ pendParStat.textContent=""; pendParStat.className="par-status"; return; }
     if(Math.abs(dif)<0.005){
-      pendParStat.textContent="Soma das parcelas: R$ "+fmtBRL(s)+" — confere com o total.";
+      pendParStat.textContent="Soma das parcelas: R$ "+fmtBRL(s)+". Confere com o total.";
       pendParStat.className="par-status ok";
     }else{
-      pendParStat.textContent="Soma das parcelas: R$ "+fmtBRL(s)+" — "
-        + (dif<0 ? "faltam R$ "+fmtBRL(-dif) : "excede em R$ "+fmtBRL(dif))+".";
+      pendParStat.textContent="Soma das parcelas: R$ "+fmtBRL(s)+". "
+        + (dif<0 ? "Faltam R$ "+fmtBRL(-dif) : "Excede em R$ "+fmtBRL(dif))+".";
       pendParStat.className="par-status erro";
     }
   }
@@ -3272,7 +3577,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     var f=p.ficha||{}, c=f.campos||{};
     var qtd=(f.itens||[]).length;
 
-    pendTituloEl.textContent = c.falecido_nome ? ("Pagamento — "+c.falecido_nome) : "Forma de pagamento";
+    pendTituloEl.textContent = c.falecido_nome ? ("Pagamento de "+c.falecido_nome) : "Forma de pagamento";
     pendSeloEl.textContent = "atendimento "+(String(c.data_atend||"").trim() || "—");
 
     var tot = pendNum(f.total) || pendNum(p.total) || 0;
@@ -3289,9 +3594,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       + pendResumoItem("Atendente", c.agente)
       + pendResumoItem("Itens", qtd + (qtd===1 ? " item lançado" : " itens lançados"));
 
-    document.querySelectorAll('[name="p_pagamento"]').forEach(function(r){
-      r.checked = (r.value === String(c.pagamento||""));
-    });
+    formasPend.aplicar(f.pagamentos, c.pagamento);
     pintarChips();
 
     var n = parseInt(c.parcelas,10); if(!(n>=1 && n<=12)) n=1;
@@ -3342,14 +3645,15 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       pendStatusPar();
     }
   }, true);
-  document.addEventListener("change", function(e){
-    if(e.target.name!=="p_pagamento") return;
-    if(["Pix","Cartão de débito","Dinheiro"].indexOf(e.target.value)>=0){
-      pendSelPar.value="1";
-      pendPar=pendRepartir(pendTotalNum(), 1);
-      pendPintarPar(); pendStatusPar();
-    }
-  });
+  var formasPend = criarFormas("p_pagamento","pFormasPag","pFormasBody","pFormasStatus","btnPFormasDividir",
+    pendTotalNum,
+    function(){
+      if(formasPend.aVista()){
+        pendSelPar.value="1";
+        pendPar=pendRepartir(pendTotalNum(), 1);
+        pendPintarPar(); pendStatusPar();
+      }
+    });
   document.getElementById("btnPendFechar").addEventListener("click", function(){
     pendEditor.hidden=true; pendAtual=null;
   });
@@ -3359,9 +3663,12 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     if(!pendAtual){ pendMsg("Escolha uma ficha da lista primeiro.", "erro"); return; }
     if(!ENVIO_URL){ pendMsg("Envio não configurado: falta a URL do Apps Script.", "erro"); return; }
 
-    var forma="";
-    document.querySelectorAll('[name="p_pagamento"]').forEach(function(r){ if(r.checked) forma=r.value; });
+    var forma=formasPend.texto();
     if(!forma){ pendMsg("Escolha a forma de pagamento antes de reenviar.", "erro"); return; }
+    if(!formasPend.ok()){
+      pendMsg("A soma das formas de pagamento não fecha com o total. Ajuste os valores.", "erro");
+      return;
+    }
 
     var tot=pendTotalNum();
     var soma=pendPar.reduce(function(a,pr){ return a+parseBRL(pr.valor); },0);
@@ -3379,6 +3686,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
 
     var ficha={
       campos: campos,
+      pagamentos: formasPend.detalhe(),
       itens: base.itens||[],
       total: tot,
       extenso: base.extenso || (tot>0 ? porExtenso(tot)+"." : ""),
@@ -3479,6 +3787,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   }
   function redesenharTudo(){
     renderCat(); renderUni(); renderAten(); renderCap(); renderSelectsFicha(); renderOS();
+    if(typeof pendMontarFiltro==="function") pendMontarFiltro();
   }
 
   var cadStamp = "";   /* carimbo da versão dos cadastros que esta tela carregou */
@@ -3529,8 +3838,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         if(!j || !j.ok) throw new Error((j && j.erro) || "resposta inesperada do servidor");
         if(!j.cadastros){
           cadStamp="";
-          statusCad("A planilha ainda não tem cadastros gravados. Os que estão aqui são deste computador — "
-                    + "clique em Confirmar alterações para enviá-los.", "aviso");
+          statusCad("A planilha ainda não tem cadastros gravados. Os que estão aqui são deste computador. "
+                    + "Clique em Confirmar alterações para enviá-los.", "aviso");
           return false;
         }
         aplicarCadastro(j.cadastros);
@@ -3543,7 +3852,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       })
       .catch(function(err){
         statusCad("Não consegui ler a planilha (" + (err && err.message ? err.message : "falha de rede")
-                  + "). Mostrando os cadastros deste computador — não confirme alterações agora, "
+                  + "). Mostrando os cadastros deste computador. Não confirme alterações agora, "
                   + "para não gravar por cima do que estiver lá.", "erro");
         return false;
       });
@@ -3676,8 +3985,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         var porCima = confirm(
             "Outra pessoa salvou alterações nos cadastros "+quando(r.gravadoEm)+", "
           + "depois que esta tela carregou.\n\n"
-          + "OK — gravar a minha versão por cima da dela (as alterações dela se perdem).\n"
-          + "Cancelar — trazer a versão da planilha (as minhas alterações de agora se perdem).");
+          + "OK: gravar a minha versão por cima da dela (as alterações dela se perdem).\n"
+          + "Cancelar: trazer a versão da planilha (as minhas alterações de agora se perdem).");
         if(porCima){ confirmarCadastros(true); }
         else { fixarCadastro(); buscarCadastroRemoto(); barraPend.hidden=true; }
         return;
