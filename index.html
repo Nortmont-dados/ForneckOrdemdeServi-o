@@ -499,6 +499,22 @@ tr.nao-sel td:not(.pick){opacity:.42}
 }
 .par-btn:hover{border-color:var(--azul-escuro)}
 .par-btn:focus-visible{outline:2px solid var(--azul-escuro);outline-offset:2px}
+.par-head .par-n{
+  margin-left:auto;font:inherit;font-size:10px;font-weight:600;cursor:pointer;
+  border:1.5px solid var(--line-strong);border-radius:var(--r-pill);
+  background:var(--surface);color:var(--azul-escuro);padding:3px 22px 3px 11px;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%235E7286' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;background-size:9px 6px;
+}
+.par-head .par-n,.par-head .par-btn{flex:0 0 auto;white-space:nowrap}
+.parc-escolha .par-tab td.fp-nome{font-size:12px;padding:0 12px 0 2px}
+.parc-escolha td.pc-sel{width:1%;text-align:right;white-space:nowrap}
+.parc-escolha td.pc-sel .par-n{margin-left:0;font-size:11px;padding:4px 24px 4px 13px;min-width:66px;text-align:left}
+.par-head .par-n:hover{border-color:var(--azul-escuro)}
+.par-head .par-n:focus-visible{outline:2px solid var(--azul-escuro);outline-offset:2px}
+.par-head .par-n ~ .par-btn{margin-left:0}
+#parBlocos .parcelas + .parcelas,#pendParBlocos .parcelas + .parcelas{margin-top:var(--space-3)}
 .par-tab{border-collapse:separate;border-spacing:6px 5px;width:calc(100% + 12px);margin:0 -6px}
 .par-tab td.np{width:22px;text-align:center;font-size:10px;font-weight:700;color:var(--muted)}
 .par-tab input{
@@ -546,6 +562,8 @@ td.tot{text-align:right;font-size:12.5px;font-weight:600;font-variant-numeric:ta
 .btn-solid{background:var(--azul);color:var(--nuvem);border-color:var(--azul);font-weight:600;padding:10px 24px;white-space:nowrap}
 .btn-solid:hover{background:var(--azul-escuro);border-color:var(--azul-escuro)}
 .btn-line{background:transparent;color:var(--azul);border-color:var(--line-strong);padding:10px 22px;white-space:nowrap}
+.btn-excluir{background:transparent;color:var(--danger);border-color:#E6C4C4;padding:10px 20px;white-space:nowrap}
+.btn-excluir:hover{background:#FBF0F0;border-color:var(--danger)}
 .btn-line:hover{border-color:var(--azul-escuro);color:var(--azul-escuro)}
 
 .cat-table th.cat{width:128px}
@@ -857,6 +875,7 @@ tr.meta-row:hover td{background:#F2F8FB}
             <label class="chip"><input type="checkbox" name="pagamento" value="Boleto">Boleto</label>
             <label class="chip"><input type="checkbox" name="pagamento" value="Dinheiro">Dinheiro</label>
             <label class="chip"><input type="checkbox" name="pagamento" value="Seguradora">Seguradora</label>
+            <label class="chip"><input type="checkbox" name="pagamento" value="Prefeitura">Prefeitura</label>
           </div>
 
           <div class="formas" id="formasPag" hidden>
@@ -870,19 +889,12 @@ tr.meta-row:hover td{background:#F2F8FB}
 
           <span class="dica-pag">Pode marcar mais de uma forma: aparece um campo para o valor de cada uma. Ainda não definido? Pode enviar em branco, que a ficha fica na aba <b>Pendências</b> até o pagamento ser informado.</span>
         </div>
-        <label class="f s4"><span class="f-label">Parcelas</span><select name="parcelas" id="selParcelas"></select></label>
+        <label class="f s4" id="campoParcelas"><span class="f-label">Parcelas</span><select name="parcelas" id="selParcelas"></select></label>
         <label class="f s4"><span class="f-label">Vencimento da 1ª</span><input class="data" name="vencimento" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off"></label>
         <label class="f s4"><span class="f-label">Nota / duplicata nº</span><input name="duplicata" placeholder="—"></label>
       </div>
 
-      <div class="parcelas">
-        <div class="par-head">
-          <span>Parcelamento</span>
-          <button type="button" class="par-btn" id="btnDividir">Dividir igualmente</button>
-        </div>
-        <table class="par-tab"><tbody id="parBody"></tbody></table>
-        <p class="par-status" id="parStatus"></p>
-      </div>
+      <div id="parBlocos"></div>
       </div>
 
       <div class="totalbox">
@@ -935,6 +947,7 @@ tr.meta-row:hover td{background:#F2F8FB}
     <div id="envItens"></div>
     <div class="fim">
       <span class="fim-nota" id="envNota"></span>
+      <button type="button" class="btn btn-excluir" id="btnEnvExcluir">Excluir ficha</button>
       <button type="button" class="btn btn-line" id="btnEnvFechar">Fechar</button>
       <button type="button" class="btn-enviar" id="btnEnvPdf">Ver PDF desta ficha</button>
     </div>
@@ -980,6 +993,7 @@ tr.meta-row:hover td{background:#F2F8FB}
               <label class="chip"><input type="checkbox" name="p_pagamento" value="Boleto">Boleto</label>
               <label class="chip"><input type="checkbox" name="p_pagamento" value="Dinheiro">Dinheiro</label>
               <label class="chip"><input type="checkbox" name="p_pagamento" value="Seguradora">Seguradora</label>
+              <label class="chip"><input type="checkbox" name="p_pagamento" value="Prefeitura">Prefeitura</label>
             </div>
 
             <div class="formas" id="pFormasPag" hidden>
@@ -991,19 +1005,12 @@ tr.meta-row:hover td{background:#F2F8FB}
               <p class="par-status" id="pFormasStatus"></p>
             </div>
           </div>
-          <label class="f s4"><span class="f-label">Parcelas</span><select id="pendParcelas"></select></label>
+          <label class="f s4" id="pendCampoParcelas"><span class="f-label">Parcelas</span><select id="pendParcelas"></select></label>
           <label class="f s4"><span class="f-label">Vencimento da 1ª</span><input class="data" id="pendVenc" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off"></label>
           <label class="f s4"><span class="f-label">Nota / duplicata nº</span><input id="pendDuplicata" placeholder="—"></label>
         </div>
 
-        <div class="parcelas">
-          <div class="par-head">
-            <span>Parcelamento</span>
-            <button type="button" class="par-btn" id="btnPendDividir">Dividir igualmente</button>
-          </div>
-          <table class="par-tab"><tbody id="pendParBody"></tbody></table>
-          <p class="par-status" id="pendParStatus"></p>
-        </div>
+        <div id="pendParBlocos"></div>
       </div>
 
       <div class="totalbox">
@@ -1705,16 +1712,23 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     var cx=tr.querySelector(".p-sel"); if(cx) cx.checked=valor;
   }
   var selParcelas=document.getElementById("selParcelas"),
-      parBody=document.getElementById("parBody"),
-      parStatus=document.getElementById("parStatus"),
+      parBlocos=document.getElementById("parBlocos"),
+      campoParcelas=document.getElementById("campoParcelas"),
       inpVenc=document.querySelector('[name="vencimento"]');
-  var parcelas=[], parEditado=false;
 
-  (function(){
-    var h="";
-    for(var i=1;i<=12;i++) h += '<option value="'+i+'">'+i+(i===1?"x (à vista)":"x")+'</option>';
-    selParcelas.innerHTML=h;
-  })();
+  /* Um plano de parcelamento para cada forma que aceita parcela. Com uma forma
+     só, que é o caso de sempre, existe um plano, comandado pelo campo
+     "Parcelas". Com boleto e cartão de crédito juntos, cada um ganha o seu
+     bloco, com o seu número de parcelas e os seus vencimentos. */
+  var planos=[];
+
+  function opcoesParcelas(n, curto){
+    var h="", i;
+    for(i=1;i<=12;i++)
+      h += '<option value="'+i+'"'+(i===n?' selected':'')+'>'+i+((i===1 && !curto)?"x (à vista)":"x")+'</option>';
+    return h;
+  }
+  selParcelas.innerHTML=opcoesParcelas(1);
 
   function lerData(t){
     var d=String(t||"").replace(/\D/g,"");
@@ -1742,69 +1756,160 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     }
     return lista;
   }
-  function pintarParcelas(){
-    var h="";
-    parcelas.forEach(function(pr,i){
-      h += '<tr data-i="'+i+'">'
+  function somaItens(l){ return l.reduce(function(a,p){ return a+parseBRL(p.valor); },0); }
+  function totalAtual(){ return parseBRL(elTotal.textContent); }
+
+  /* O que cada bloco precisa cobrir. Uma forma só, ou todas à vista: o total da
+     ficha. Pagamento dividido: o valor de cada forma que aceita parcela. */
+  function alvosParcelas(){
+    if(typeof formasOS==="undefined" || !formasOS) return [{forma:"", base:totalAtual()}];
+    var l=formasOS.lista(), parc=formasOS.parcelaveis();
+    if(l.length<2) return [{forma:(parc.length ? parc[0] : ""), base:totalAtual()}];
+    if(!parc.length) return [{forma:"", base:totalAtual()}];
+    return parc.map(function(f){ return {forma:f, base:formasOS.valorDe(f)}; });
+  }
+
+  function montarPlanos(forcar){
+    var alvos=alvosParcelas(), unico=alvos.length===1, antigos=planos;
+    planos = alvos.map(function(a){
+      var v=null, i;
+      for(i=0;i<antigos.length;i++) if(antigos[i].forma===a.forma){ v=antigos[i]; break; }
+      var n = unico ? (parseInt(selParcelas.value,10)||1) : (v ? v.n : 1);
+      if(!(n>=1 && n<=12)) n=1;
+      var mesmo = !!(v && v.itens.length===n);
+      if(mesmo && v.editado && !forcar)
+        return {forma:a.forma, base:a.base, n:n, itens:v.itens, editado:true};
+      var datas = mesmo ? v.itens.map(function(p){ return p.venc; }) : datasPadrao(n);
+      return {forma:a.forma, base:a.base, n:n, itens:dividir(a.base,n,datas), editado:false};
+    });
+    if(campoParcelas) campoParcelas.hidden = !unico;
+    if(unico && planos[0]) selParcelas.value=String(planos[0].n);
+    pintarPlanos();
+  }
+
+  function rotuloPlano(p){
+    return (p.forma && Math.abs(p.base-totalAtual())>0.005) ? "Parcelamento: "+p.forma : "Parcelamento";
+  }
+  function linhasParcelas(itens){
+    return itens.map(function(pr,i){
+      return '<tr data-i="'+i+'">'
         + '<td class="np">'+(i+1)+'ª</td>'
         + '<td><input class="data pr-venc" value="'+esc(pr.venc)+'" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off" aria-label="Vencimento da parcela '+(i+1)+'"></td>'
         + '<td><input class="pr-val" value="'+esc(pr.valor)+'" inputmode="decimal" placeholder="0,00" aria-label="Valor da parcela '+(i+1)+'"></td>'
         + '</tr>';
+    }).join("");
+  }
+  /* Tabela de parcelas só para quem está mesmo parcelado: à vista não tem o
+     que parcelar. Com o pagamento dividido entre duas formas que aceitam
+     parcela, uma listinha em cima escolhe em quantas vezes vai cada uma. */
+  function pintarPlanos(){
+    var varios=planos.length>1, h="";
+    if(varios){
+      h += '<div class="parcelas parc-escolha"><div class="par-head"><span>Parcelar em</span></div>'
+        + '<table class="par-tab"><tbody>'
+        + planos.map(function(p,ip){
+            return '<tr data-p="'+ip+'"><td class="fp-nome">'+esc(p.forma)+'</td>'
+              + '<td class="pc-sel"><select class="par-n" aria-label="Parcelas em '+esc(p.forma)+'">'
+              + opcoesParcelas(p.n, true)+'</select></td></tr>';
+          }).join("")
+        + '</tbody></table></div>';
+    }
+    h += planos.map(function(p,ip){
+      if(p.n<2) return '';
+      return '<div class="parcelas" data-p="'+ip+'">'
+        + '<div class="par-head"><span>'+esc(rotuloPlano(p))+'</span>'
+        + '<button type="button" class="par-btn pb-dividir">Dividir igualmente</button></div>'
+        + '<table class="par-tab"><tbody>'+linhasParcelas(p.itens)+'</tbody></table>'
+        + '<p class="par-status"></p></div>';
+    }).join("");
+    parBlocos.innerHTML=h;
+    statusPlanos();
+  }
+  function statusPlanos(){
+    planos.forEach(function(p,ip){
+      var bl=parBlocos.querySelector('.parcelas[data-p="'+ip+'"]');
+      var el=bl && bl.querySelector(".par-status");
+      if(!el) return;
+      var s=somaItens(p.itens), dif=Math.round((s-p.base)*100)/100;
+      if(!(p.base>0) && s===0){ el.textContent=""; el.className="par-status"; return; }
+      var alvo=(p.forma && Math.abs(p.base-totalAtual())>0.005) ? "com o valor em "+p.forma : "com o total";
+      if(Math.abs(dif)<0.005){
+        el.textContent="Soma das parcelas: R$ "+fmtBRL(s)+". Confere "+alvo+".";
+        el.className="par-status ok";
+      }else{
+        el.textContent="Soma das parcelas: R$ "+fmtBRL(s)+". "
+          + (dif<0 ? "Faltam R$ "+fmtBRL(-dif) : "Excede em R$ "+fmtBRL(dif))+".";
+        el.className="par-status erro";
+      }
     });
-    parBody.innerHTML=h;
   }
-  function statusParcelas(soma){
-    var somaPar=parcelas.reduce(function(a,pr){ return a+parseBRL(pr.valor); },0);
-    var dif=Math.round((somaPar-soma)*100)/100;
-    if(!(soma>0) && somaPar===0){ parStatus.textContent=""; parStatus.className="par-status"; return; }
-    if(Math.abs(dif)<0.005){
-      parStatus.textContent="Soma das parcelas: R$ "+fmtBRL(somaPar)+". Confere com o total.";
-      parStatus.className="par-status ok";
-    }else{
-      parStatus.textContent="Soma das parcelas: R$ "+fmtBRL(somaPar)+". "
-        + (dif<0 ? "Faltam R$ "+fmtBRL(-dif) : "Excede em R$ "+fmtBRL(dif))+".";
-      parStatus.className="par-status erro";
+  function planoDe(el){
+    var bl=el.closest("[data-p]");
+    return bl ? planos[+bl.getAttribute("data-p")] : null;
+  }
+  /* todas as parcelas, de todos os blocos, cada uma com a sua forma */
+  function todasParcelas(){
+    var saida=[];
+    planos.forEach(function(p){
+      p.itens.forEach(function(pr){ saida.push({forma:p.forma, venc:pr.venc, valor:parseBRL(pr.valor)}); });
+    });
+    return saida;
+  }
+  function planosParaPdf(){
+    return planos.map(function(p){
+      return {forma:p.forma, base:p.base,
+              parcelas:p.itens.map(function(pr){ return {venc:pr.venc, valor:parseBRL(pr.valor)}; })};
+    });
+  }
+  /* devolve o primeiro bloco que não fecha, ou null se está tudo certo */
+  function planoQueNaoFecha(){
+    for(var i=0;i<planos.length;i++){
+      var p=planos[i];
+      if(p.base>0 && Math.abs(somaItens(p.itens)-p.base)>0.005) return p;
     }
+    return null;
   }
-  function montarParcelas(soma, redistribuir){
-    var n=parseInt(selParcelas.value,10)||1;
-    if(redistribuir || parcelas.length!==n){
-      var datas = parcelas.length===n ? parcelas.map(function(p){ return p.venc; }) : datasPadrao(n);
-      parcelas = dividir(soma, n, datas);
-      parEditado=false;
-      pintarParcelas();
-    }
-    statusParcelas(soma);
-  }
-  function totalAtual(){ return parseBRL(elTotal.textContent); }
 
-  selParcelas.addEventListener("change", function(){ montarParcelas(totalAtual(), true); });
-  document.getElementById("btnDividir").addEventListener("click", function(){
-    parcelas = dividir(totalAtual(), parcelas.length||1, datasPadrao(parcelas.length||1));
-    parEditado=false;
-    pintarParcelas(); statusParcelas(totalAtual());
+  selParcelas.addEventListener("change", function(){ montarPlanos(true); });
+  parBlocos.addEventListener("change", function(e){
+    if(!e.target.classList || !e.target.classList.contains("par-n")) return;
+    var p=planoDe(e.target); if(!p) return;
+    p.n=parseInt(e.target.value,10)||1;
+    montarPlanos(true);
   });
-  parBody.addEventListener("input", function(e){
-    var tr=e.target.closest("tr"); if(!tr) return;
-    var pr=parcelas[+tr.dataset.i]; if(!pr) return;
+  parBlocos.addEventListener("click", function(e){
+    var b=e.target.closest(".pb-dividir"); if(!b) return;
+    var p=planoDe(b); if(!p) return;
+    p.itens=dividir(p.base, p.n, datasPadrao(p.n));
+    p.editado=false;
+    pintarPlanos();
+  });
+  parBlocos.addEventListener("input", function(e){
+    var tr=e.target.closest("tr"), p=planoDe(e.target);
+    if(!tr || !p) return;
+    var pr=p.itens[+tr.getAttribute("data-i")]; if(!pr) return;
     if(e.target.classList.contains("pr-venc")) pr.venc=e.target.value;
-    if(e.target.classList.contains("pr-val")){ pr.valor=e.target.value; parEditado=true; statusParcelas(totalAtual()); }
+    if(e.target.classList.contains("pr-val")){ pr.valor=e.target.value; p.editado=true; statusPlanos(); }
   });
-  parBody.addEventListener("blur", function(e){
-    if(!e.target.classList.contains("pr-val")) return;
-    var tr=e.target.closest("tr"), pr=parcelas[+tr.dataset.i];
-    if(pr && e.target.value.trim()){ pr.valor=fmtBRL(parseBRL(e.target.value)); e.target.value=pr.valor; statusParcelas(totalAtual()); }
+  parBlocos.addEventListener("blur", function(e){
+    if(!e.target.classList || !e.target.classList.contains("pr-val")) return;
+    var tr=e.target.closest("tr"), p=planoDe(e.target);
+    if(!tr || !p) return;
+    var pr=p.itens[+tr.getAttribute("data-i")];
+    if(pr && e.target.value.trim()){ pr.valor=fmtBRL(parseBRL(e.target.value)); e.target.value=pr.valor; statusPlanos(); }
   }, true);
   if(inpVenc) inpVenc.addEventListener("change", function(){
-    var datas=datasPadrao(parcelas.length||1);
-    parcelas.forEach(function(pr,i){ pr.venc=datas[i]||pr.venc; });
-    pintarParcelas();
+    planos.forEach(function(p){
+      var datas=datasPadrao(p.itens.length||1);
+      p.itens.forEach(function(pr,i){ pr.venc=datas[i]||pr.venc; });
+    });
+    pintarPlanos();
   });
   /* ============ formas de pagamento: pode ser mais de uma ============
      Uma só forma funciona como antes. Com duas ou mais, aparece um campo de
      valor para cada uma e a soma é conferida contra o total da ficha. */
   /* formas que não têm parcelamento: ao marcar só essas, o número de parcelas volta para 1 */
-  var FORMAS_A_VISTA = ["Pix","Cartão de débito","Dinheiro","Seguradora"];
+  var FORMAS_A_VISTA = ["Pix","Cartão de débito","Dinheiro","Seguradora","Prefeitura"];
 
   function criarFormas(campo, idBloco, idBody, idStatus, idDividir, totalDe, aoMudar){
     var bloco=document.getElementById(idBloco),
@@ -1870,6 +1975,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       valores[tr.getAttribute("data-forma")]=e.target.value;
       editado=true;
       verStatus();
+      if(typeof aoMudar==="function") aoMudar();
     });
     corpo.addEventListener("blur", function(e){
       if(!e.target.classList || !e.target.classList.contains("fp-val")) return;
@@ -1908,6 +2014,11 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         for(var i=0;i<l.length;i++) if(FORMAS_A_VISTA.indexOf(l[i])<0) return false;
         return true;
       },
+      /* Formas que aceitam parcela: cada uma ganha o seu bloco de parcelamento. */
+      parcelaveis: function(){
+        return lista().filter(function(f){ return FORMAS_A_VISTA.indexOf(f)<0; });
+      },
+      valorDe: function(f){ return parseBRL(valores[f]||0); },
       recalcular: function(){ if(!editado) repartir(); pintar(); },
       limpar: function(){
         caixas().forEach(function(c){ c.checked=false; });
@@ -1936,10 +2047,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   var formasOS = criarFormas("pagamento","formasPag","formasBody","formasStatus","btnFormasDividir",
     totalAtual,
     function(){
-      if(formasOS.aVista()){
-        selParcelas.value="1";
-        montarParcelas(totalAtual(), true);
-      }
+      if(formasOS.aVista()) selParcelas.value="1";
+      montarPlanos(false);
     });
 
   /* ---------- desconto: em reais ou em porcentagem ---------- */
@@ -2005,8 +2114,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
 
     elTotal.textContent = fmtBRL(soma);
     elExtenso.textContent = soma>0 ? porExtenso(soma)+"." : "";
-    montarParcelas(soma, !parEditado);
     if(formasOS) formasOS.recalcular();
+    montarPlanos(false);
   }
   function subtotalAtual(){ return parseBRL(elSub.textContent); }
   function descontoAtual(){ return parseBRL(elDescAplicado.textContent); }
@@ -2432,7 +2541,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       else el.value="";
     });
     fichaAgente=""; fichaCapela=""; fichaUF=""; fichaCidade="";
-    lanc={}; livres=[]; parcelas=[]; parEditado=false; selParcelas.value="1";
+    lanc={}; livres=[]; planos=[]; selParcelas.value="1";
     formasOS.limpar();
     blocoDesconto.hidden=true; document.getElementById("btnDesconto").hidden=false; descValor.value="";
     pintarChips(); renderSelectsFicha(); renderOS();
@@ -2934,14 +3043,31 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         + (Number(c.parcelas)>1 ? '  ·  '+esc(c.parcelas)+'x' : '')+'</div>';
 
     var th='font-size:7pt;letter-spacing:.14em;font-weight:700;color:#fff;background:'+PDF_AZUL+';padding:6px 10px;';
-    var parcelas=(d.parcelas||[]).filter(function(p){ return p.valor>0; });
-    var blocoPar = parcelas.length ? pdfRotulo("Parcelamento")
-      + '<table style="width:100%;border-collapse:collapse;margin:3px 0 10px">'
-      + parcelas.map(function(p,i){
-          return '<tr><td style="width:26px;font-size:8pt;color:'+PDF_CINZA+';padding:2px 0">'+(i+1)+'ª</td>'
-            + '<td style="font-size:9.5pt;color:'+PDF_TINTA+';padding:2px 0">'+esc(p.venc||"—")+'</td>'
-            + '<td style="font-size:9.5pt;color:'+PDF_TINTA+';padding:2px 0;text-align:right">R$ '+fmtBRL(p.valor)+'</td></tr>';
-        }).join("")+'</table>' : '';
+    function pdfParcelas(rot, lista){
+      var l=(lista||[]).filter(function(p){ return Number(p.valor)>0; });
+      if(!l.length) return '';
+      if(l.length===1 && !l[0].venc) return '';   /* à vista sem data: nada a listar */
+      return pdfRotulo(rot)
+        + '<table style="width:100%;border-collapse:collapse;margin:3px 0 10px">'
+        + l.map(function(p,i){
+            return '<tr><td style="width:26px;font-size:8pt;color:'+PDF_CINZA+';padding:2px 0">'+(i+1)+'ª</td>'
+              + '<td style="font-size:9.5pt;color:'+PDF_TINTA+';padding:2px 0">'+esc(p.venc||"—")+'</td>'
+              + '<td style="font-size:9.5pt;color:'+PDF_TINTA+';padding:2px 0;text-align:right">R$ '+fmtBRL(Number(p.valor)||0)+'</td></tr>';
+          }).join("")+'</table>';
+    }
+    var blocoPar="";
+    if(Object.prototype.toString.call(d.planos)==="[object Array]" && d.planos.length){
+      blocoPar = d.planos.map(function(p){
+        return pdfParcelas((p.forma && Math.abs(Number(p.base)-Number(d.total))>0.005)
+                           ? "Parcelamento: "+p.forma : "Parcelamento", p.parcelas);
+      }).join("");
+    }else{
+      /* fichas enviadas antes desta versão: uma lista só */
+      var nomesPar=(d.formasParceladas||[]);
+      blocoPar = pdfParcelas((nomesPar.length && Number(d.baseParcelas)>0
+                              && Math.abs(Number(d.baseParcelas)-Number(d.total))>0.005)
+                             ? "Parcelamento: "+nomesPar.join(" e ") : "Parcelamento", d.parcelas);
+    }
 
     return ''
       + '<div style="width:760px;padding:0;font-family:Montserrat,Helvetica,Arial,sans-serif;color:#33404F;background:#fff">'
@@ -3084,15 +3210,18 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       itens.push({item:(l.d||"Outros serviços"), modelo:"", unidade:"", qtd:q, valorUnit:vu, total:q*vu});
     });
     campos.pagamento = formasOS.texto();
+    campos.parcelas  = String(todasParcelas().length || 1);
     return {
       campos:campos,
       pagamentos: formasOS.detalhe(),
       itens:itens,
+      planos: planosParaPdf(),
+      formasParceladas: formasOS.parcelaveis(),
       subtotal: subtotalAtual() || parseBRL(elTotal.textContent),
       desconto: descontoAtual(),
       total:parseBRL(elTotal.textContent),
       extenso:elExtenso.textContent,
-      parcelas:parcelas.map(function(pr){ return {venc:pr.venc, valor:parseBRL(pr.valor)}; }),
+      parcelas: todasParcelas(),
       enviadoEm:new Date().toISOString()
     };
   }
@@ -3151,9 +3280,10 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       return;
     }
     if(EXIGIR_PARCELAS && dados.total>0 && String(dados.campos.pagamento||"").trim()){
-      var somaPar=dados.parcelas.reduce(function(a,pr){ return a+pr.valor; },0);
-      if(Math.abs(somaPar-dados.total)>0.005){
-        aviso("A soma das parcelas não fecha com o total. Ajuste o parcelamento.", "erro");
+      var ruim=planoQueNaoFecha();
+      if(ruim){
+        aviso("A soma das parcelas"+(ruim.forma ? " em "+ruim.forma : "")
+              +" não fecha com R$ "+fmtBRL(ruim.base)+". Ajuste o parcelamento.", "erro");
         return;
       }
     }
@@ -3370,6 +3500,43 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   document.getElementById("btnEnvFechar").addEventListener("click", function(){
     envDet.hidden=true; envAberta=null;
   });
+
+  document.getElementById("btnEnvExcluir").addEventListener("click", function(){
+    if(!envAberta) return;
+    var c=(envAberta.ficha && envAberta.ficha.campos) || {}, k=envAberta.colunas || {};
+    var nome=String(c.falecido_nome || k["Falecido"] || "sem nome").trim();
+
+    var motivo=prompt(
+        "Excluir a ficha de "+nome+"?\n\n"
+      + "Ela sai desta lista, mas continua guardada na planilha, marcada como excluída, "
+      + "com a data e o motivo.\n\n"
+      + "Motivo (pode deixar em branco):", "");
+    if(motivo===null) return;        /* cancelou */
+
+    var b=this, linha=envAberta.linha;
+    b.disabled=true; b.textContent="Excluindo…";
+    envNota.textContent="Marcando a ficha como excluída…";
+
+    fetch(ENVIO_URL, {
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({acao:"excluirFicha", linha:linha, motivo:motivo})
+    })
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      var j=null; try{ j=JSON.parse(t); }catch(e){}
+      if(!j || !j.ok) throw new Error((j && j.erro) || "o servidor recusou a exclusão");
+      enviadas = enviadas.filter(function(f){ return Number(f.linha)!==Number(linha); });
+      envDet.hidden=true; envAberta=null;
+      envNota.textContent="";
+      envPintar();
+      envMsg("Ficha de "+nome+" excluída. Ela continua guardada na planilha.", "");
+    })
+    .catch(function(err){
+      envNota.textContent="Não consegui excluir ("+(err && err.message ? err.message : "falha de rede")+").";
+    })
+    .then(function(){ b.disabled=false; b.textContent="Excluir ficha"; });
+  });
   document.getElementById("btnEnvRecarregar").addEventListener("click", function(){ envCarregar(true); });
 
   btnEnvPdf.addEventListener("click", function(){
@@ -3403,28 +3570,23 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       pendSelPar   = document.getElementById("pendParcelas"),
       pendVenc     = document.getElementById("pendVenc"),
       pendDup      = document.getElementById("pendDuplicata"),
-      pendParBody  = document.getElementById("pendParBody"),
-      pendParStat  = document.getElementById("pendParStatus"),
+      pendParBlocos= document.getElementById("pendParBlocos"),
+      pendCampoPar = document.getElementById("pendCampoParcelas"),
       pendTotalEl  = document.getElementById("pendTotal"),
       pendExtEl    = document.getElementById("pendExtenso"),
       pendNotaEl   = document.getElementById("pendNota"),
       btnPendEnv   = document.getElementById("btnPendEnviar"),
       pendFiltro   = document.getElementById("pendFiltroUni");
 
-  var pendentes=[], pendAtual=null, pendPar=[], pendBuscando=false;
+  var pendentes=[], pendAtual=null, pendPlanos=[], pendBuscando=false;
 
-  (function(){
-    var h="";
-    for(var i=1;i<=12;i++) h += '<option value="'+i+'">'+i+(i===1?"x (à vista)":"x")+'</option>';
-    pendSelPar.innerHTML=h;
-  })();
+  pendSelPar.innerHTML=opcoesParcelas(1);
 
   function pendMsg(txt, cor){
     pendNotaEl.textContent=txt;
     pendNotaEl.style.color = cor==="ok" ? "var(--success)" : cor==="erro" ? "var(--danger)" : "var(--muted)";
   }
   function pendNum(v){ return typeof v==="number" ? v : parseBRL(v); }
-  function pendTotalNum(){ return parseBRL(pendTotalEl.textContent); }
 
   function pendContador(visiveis){
     var n=pendentes.length;
@@ -3534,32 +3696,97 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     for(var i=0;i<n;i++) saida.push(base ? somaMeses(base,i) : "");
     return saida;
   }
-  function pendRepartir(soma, n){ return dividir(soma, n, pendDatas(n)); }
+  function pendTotalNum(){ return parseBRL(pendTotalEl.textContent); }
 
-  function pendPintarPar(){
-    var h="";
-    pendPar.forEach(function(pr,i){
-      h += '<tr data-i="'+i+'">'
-        + '<td class="np">'+(i+1)+'ª</td>'
-        + '<td><input class="data pr-venc" value="'+esc(pr.venc)+'" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off" aria-label="Vencimento da parcela '+(i+1)+'"></td>'
-        + '<td><input class="pr-val" value="'+esc(pr.valor)+'" inputmode="decimal" placeholder="0,00" aria-label="Valor da parcela '+(i+1)+'"></td>'
-        + '</tr>';
-    });
-    pendParBody.innerHTML=h;
+  function pendAlvos(){
+    if(typeof formasPend==="undefined" || !formasPend) return [{forma:"", base:pendTotalNum()}];
+    var l=formasPend.lista(), parc=formasPend.parcelaveis();
+    if(l.length<2) return [{forma:(parc.length ? parc[0] : ""), base:pendTotalNum()}];
+    if(!parc.length) return [{forma:"", base:pendTotalNum()}];
+    return parc.map(function(f){ return {forma:f, base:formasPend.valorDe(f)}; });
   }
-  function pendStatusPar(){
-    var soma=pendTotalNum();
-    var s=pendPar.reduce(function(a,pr){ return a+parseBRL(pr.valor); },0);
-    var dif=Math.round((s-soma)*100)/100;
-    if(!(soma>0) && s===0){ pendParStat.textContent=""; pendParStat.className="par-status"; return; }
-    if(Math.abs(dif)<0.005){
-      pendParStat.textContent="Soma das parcelas: R$ "+fmtBRL(s)+". Confere com o total.";
-      pendParStat.className="par-status ok";
-    }else{
-      pendParStat.textContent="Soma das parcelas: R$ "+fmtBRL(s)+". "
-        + (dif<0 ? "Faltam R$ "+fmtBRL(-dif) : "Excede em R$ "+fmtBRL(dif))+".";
-      pendParStat.className="par-status erro";
+  function pendMontarPlanos(forcar){
+    var alvos=pendAlvos(), unico=alvos.length===1, antigos=pendPlanos;
+    pendPlanos = alvos.map(function(a){
+      var v=null, i;
+      for(i=0;i<antigos.length;i++) if(antigos[i].forma===a.forma){ v=antigos[i]; break; }
+      var n = unico ? (parseInt(pendSelPar.value,10)||1) : (v ? v.n : 1);
+      if(!(n>=1 && n<=12)) n=1;
+      var mesmo = !!(v && v.itens.length===n);
+      if(mesmo && v.editado && !forcar)
+        return {forma:a.forma, base:a.base, n:n, itens:v.itens, editado:true};
+      var datas = mesmo ? v.itens.map(function(p){ return p.venc; }) : pendDatas(n);
+      return {forma:a.forma, base:a.base, n:n, itens:dividir(a.base,n,datas), editado:false};
+    });
+    if(pendCampoPar) pendCampoPar.hidden = !unico;
+    if(unico && pendPlanos[0]) pendSelPar.value=String(pendPlanos[0].n);
+    pendPintarPlanos();
+  }
+  function pendPintarPlanos(){
+    var varios=pendPlanos.length>1, h="";
+    if(varios){
+      h += '<div class="parcelas parc-escolha"><div class="par-head"><span>Parcelar em</span></div>'
+        + '<table class="par-tab"><tbody>'
+        + pendPlanos.map(function(p,ip){
+            return '<tr data-p="'+ip+'"><td class="fp-nome">'+esc(p.forma)+'</td>'
+              + '<td class="pc-sel"><select class="par-n" aria-label="Parcelas em '+esc(p.forma)+'">'
+              + opcoesParcelas(p.n, true)+'</select></td></tr>';
+          }).join("")
+        + '</tbody></table></div>';
     }
+    h += pendPlanos.map(function(p,ip){
+      if(p.n<2) return '';
+      var rot=(p.forma && Math.abs(p.base-pendTotalNum())>0.005) ? "Parcelamento: "+p.forma : "Parcelamento";
+      return '<div class="parcelas" data-p="'+ip+'">'
+        + '<div class="par-head"><span>'+esc(rot)+'</span>'
+        + '<button type="button" class="par-btn pb-dividir">Dividir igualmente</button></div>'
+        + '<table class="par-tab"><tbody>'+linhasParcelas(p.itens)+'</tbody></table>'
+        + '<p class="par-status"></p></div>';
+    }).join("");
+    pendParBlocos.innerHTML=h;
+    pendStatusPlanos();
+  }
+  function pendStatusPlanos(){
+    pendPlanos.forEach(function(p,ip){
+      var bl=pendParBlocos.querySelector('.parcelas[data-p="'+ip+'"]');
+      var el=bl && bl.querySelector(".par-status");
+      if(!el) return;
+      var s=somaItens(p.itens), dif=Math.round((s-p.base)*100)/100;
+      if(!(p.base>0) && s===0){ el.textContent=""; el.className="par-status"; return; }
+      var alvo=(p.forma && Math.abs(p.base-pendTotalNum())>0.005) ? "com o valor em "+p.forma : "com o total";
+      if(Math.abs(dif)<0.005){
+        el.textContent="Soma das parcelas: R$ "+fmtBRL(s)+". Confere "+alvo+".";
+        el.className="par-status ok";
+      }else{
+        el.textContent="Soma das parcelas: R$ "+fmtBRL(s)+". "
+          + (dif<0 ? "Faltam R$ "+fmtBRL(-dif) : "Excede em R$ "+fmtBRL(dif))+".";
+        el.className="par-status erro";
+      }
+    });
+  }
+  function pendPlanoDe(el){
+    var bl=el.closest("[data-p]");
+    return bl ? pendPlanos[+bl.getAttribute("data-p")] : null;
+  }
+  function pendTodasParcelas(){
+    var saida=[];
+    pendPlanos.forEach(function(p){
+      p.itens.forEach(function(pr){ saida.push({forma:p.forma, venc:pr.venc, valor:parseBRL(pr.valor)}); });
+    });
+    return saida;
+  }
+  function pendPlanosParaPdf(){
+    return pendPlanos.map(function(p){
+      return {forma:p.forma, base:p.base,
+              parcelas:p.itens.map(function(pr){ return {venc:pr.venc, valor:parseBRL(pr.valor)}; })};
+    });
+  }
+  function pendPlanoQueNaoFecha(){
+    for(var i=0;i<pendPlanos.length;i++){
+      var p=pendPlanos[i];
+      if(p.base>0 && Math.abs(somaItens(p.itens)-p.base)>0.005) return p;
+    }
+    return null;
   }
 
   function pendResumoItem(rot, val){
@@ -3601,9 +3828,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     pendSelPar.value = String(n);
     pendVenc.value = c.vencimento || "";
     pendDup.value  = c.duplicata || "";
-    pendPar = pendRepartir(tot, n);
-    pendPintarPar();
-    pendStatusPar();
+    pendPlanos=[];
+    pendMontarPlanos(true);
     pendMsg("", "");
 
     pendEditor.hidden=false;
@@ -3616,43 +3842,50 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     if(it) pendAbrir(it.getAttribute("data-id"));
   });
 
-  pendSelPar.addEventListener("change", function(){
-    pendPar=pendRepartir(pendTotalNum(), parseInt(pendSelPar.value,10)||1);
-    pendPintarPar(); pendStatusPar();
+  pendSelPar.addEventListener("change", function(){ pendMontarPlanos(true); });
+  pendParBlocos.addEventListener("change", function(e){
+    if(!e.target.classList || !e.target.classList.contains("par-n")) return;
+    var p=pendPlanoDe(e.target); if(!p) return;
+    p.n=parseInt(e.target.value,10)||1;
+    pendMontarPlanos(true);
   });
-  document.getElementById("btnPendDividir").addEventListener("click", function(){
-    pendPar=pendRepartir(pendTotalNum(), pendPar.length||1);
-    pendPintarPar(); pendStatusPar();
+  pendParBlocos.addEventListener("click", function(e){
+    var b=e.target.closest(".pb-dividir"); if(!b) return;
+    var p=pendPlanoDe(b); if(!p) return;
+    p.itens=dividir(p.base, p.n, pendDatas(p.n));
+    p.editado=false;
+    pendPintarPlanos();
   });
   pendVenc.addEventListener("change", function(){
-    var datas=pendDatas(pendPar.length||1);
-    pendPar.forEach(function(pr,i){ pr.venc = datas[i] || pr.venc; });
-    pendPintarPar();
+    pendPlanos.forEach(function(p){
+      var datas=pendDatas(p.itens.length||1);
+      p.itens.forEach(function(pr,i){ pr.venc = datas[i] || pr.venc; });
+    });
+    pendPintarPlanos();
   });
-  pendParBody.addEventListener("input", function(e){
-    var tr=e.target.closest("tr"); if(!tr) return;
-    var pr=pendPar[+tr.getAttribute("data-i")]; if(!pr) return;
+  pendParBlocos.addEventListener("input", function(e){
+    var tr=e.target.closest("tr"), p=pendPlanoDe(e.target);
+    if(!tr || !p) return;
+    var pr=p.itens[+tr.getAttribute("data-i")]; if(!pr) return;
     if(e.target.classList.contains("pr-venc")) pr.venc=e.target.value;
-    if(e.target.classList.contains("pr-val")){ pr.valor=e.target.value; pendStatusPar(); }
+    if(e.target.classList.contains("pr-val")){ pr.valor=e.target.value; p.editado=true; pendStatusPlanos(); }
   });
-  pendParBody.addEventListener("blur", function(e){
+  pendParBlocos.addEventListener("blur", function(e){
     if(!e.target.classList || !e.target.classList.contains("pr-val")) return;
-    var tr=e.target.closest("tr"); if(!tr) return;
-    var pr=pendPar[+tr.getAttribute("data-i")];
+    var tr=e.target.closest("tr"), p=pendPlanoDe(e.target);
+    if(!tr || !p) return;
+    var pr=p.itens[+tr.getAttribute("data-i")];
     if(pr && e.target.value.trim()){
       pr.valor=fmtBRL(parseBRL(e.target.value));
       e.target.value=pr.valor;
-      pendStatusPar();
+      pendStatusPlanos();
     }
   }, true);
   var formasPend = criarFormas("p_pagamento","pFormasPag","pFormasBody","pFormasStatus","btnPFormasDividir",
     pendTotalNum,
     function(){
-      if(formasPend.aVista()){
-        pendSelPar.value="1";
-        pendPar=pendRepartir(pendTotalNum(), 1);
-        pendPintarPar(); pendStatusPar();
-      }
+      if(formasPend.aVista()) pendSelPar.value="1";
+      pendMontarPlanos(false);
     });
   document.getElementById("btnPendFechar").addEventListener("click", function(){
     pendEditor.hidden=true; pendAtual=null;
@@ -3671,26 +3904,29 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     }
 
     var tot=pendTotalNum();
-    var soma=pendPar.reduce(function(a,pr){ return a+parseBRL(pr.valor); },0);
-    if(EXIGIR_PARCELAS && tot>0 && Math.abs(soma-tot)>0.005){
-      pendMsg("A soma das parcelas não fecha com o total. Ajuste o parcelamento.", "erro");
+    var ruim=EXIGIR_PARCELAS ? pendPlanoQueNaoFecha() : null;
+    if(ruim){
+      pendMsg("A soma das parcelas"+(ruim.forma ? " em "+ruim.forma : "")
+              +" não fecha com R$ "+fmtBRL(ruim.base)+". Ajuste o parcelamento.", "erro");
       return;
     }
 
     var base=pendAtual.ficha||{}, antigos=base.campos||{}, campos={};
     for(var k in antigos) if(Object.prototype.hasOwnProperty.call(antigos,k)) campos[k]=antigos[k];
     campos.pagamento  = forma;
-    campos.parcelas   = pendSelPar.value;
+    campos.parcelas   = String(pendTodasParcelas().length || 1);
     campos.vencimento = pendVenc.value;
     campos.duplicata  = pendDup.value;
 
     var ficha={
       campos: campos,
       pagamentos: formasPend.detalhe(),
+      planos: pendPlanosParaPdf(),
+      formasParceladas: formasPend.parcelaveis(),
       itens: base.itens||[],
       total: tot,
       extenso: base.extenso || (tot>0 ? porExtenso(tot)+"." : ""),
-      parcelas: pendPar.map(function(pr){ return {venc:pr.venc, valor:parseBRL(pr.valor)}; }),
+      parcelas: pendTodasParcelas(),
       enviadoEm: base.enviadoEm || "",
       atualizadoEm: new Date().toISOString()
     };
