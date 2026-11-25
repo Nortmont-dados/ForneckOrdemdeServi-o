@@ -242,6 +242,16 @@ h2,h3,p{margin:0}
   padding:1px 9px;margin-right:7px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
   print-color-adjust:exact;-webkit-print-color-adjust:exact;
 }
+.exc-bar{
+  display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;
+  background:var(--surface);border:1.5px solid #E6C4C4;border-radius:var(--r-lg);
+  padding:var(--space-2) var(--space-3);margin-bottom:var(--space-3);
+}
+.exc-bar .exc-txt{flex:1;min-width:160px;font-size:11.5px;font-weight:600;color:var(--danger)}
+.exc-bar .btn{padding:7px 17px;font-size:11.5px}
+.exc-bar .btn:disabled{opacity:.45;cursor:default}
+.exc-vazio{flex:0 0 24px;text-align:center;color:var(--muted);font-size:13px}
+.pend-item.sel-on{border-color:var(--danger);background:#FDF6F6}
 .pend-item{
   display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;
   background:var(--surface);border:1.5px solid var(--ficha-line);border-radius:var(--r-lg);
@@ -739,10 +749,12 @@ tr.meta-row:hover td{background:#F2F8FB}
   </div>
 
   <div class="actions" id="acoesEnv" hidden>
+    <button type="button" class="btn btn-outline" id="btnEnvExcluirModo">Excluir fichas</button>
     <button type="button" class="btn btn-mint" id="btnEnvRecarregar">Atualizar lista</button>
   </div>
 
   <div class="actions" id="acoesPend" hidden>
+    <button type="button" class="btn btn-outline" id="btnPendExcluirModo">Excluir fichas</button>
     <button type="button" class="btn btn-mint" id="btnPendRecarregar">Atualizar lista</button>
   </div>
 
@@ -935,6 +947,12 @@ tr.meta-row:hover td{background:#F2F8FB}
       <label class="f s7"><span class="f-label">Buscar por falecido, contratante ou nº da ficha</span><input id="envBusca" placeholder="Digite parte do nome ou o número" autocomplete="off"></label>
     </div>
     <p class="pend-aviso" id="envAviso"></p>
+    <div class="exc-bar" id="envExcBar" hidden>
+      <label class="check" title="Marcar todas"><input type="checkbox" id="envExcTodas"><span class="cx"></span></label>
+      <span class="exc-txt" id="envExcTxt">Marque as fichas que quer excluir.</span>
+      <button type="button" class="btn btn-line" id="envExcCancelar">Cancelar</button>
+      <button type="button" class="btn btn-excluir" id="envExcConfirmar" disabled>Excluir marcadas</button>
+    </div>
     <div class="pend-lista" id="envLista"></div>
   </section>
 
@@ -970,6 +988,12 @@ tr.meta-row:hover td{background:#F2F8FB}
     </p>
     <p class="pend-aviso" id="pendAviso"></p>
     <label class="f pend-filtro"><span class="f-label">Unidade</span><select id="pendFiltroUni"></select></label>
+    <div class="exc-bar" id="pendExcBar" hidden>
+      <label class="check" title="Marcar todas"><input type="checkbox" id="pendExcTodas"><span class="cx"></span></label>
+      <span class="exc-txt" id="pendExcTxt">Marque as fichas que quer excluir.</span>
+      <button type="button" class="btn btn-line" id="pendExcCancelar">Cancelar</button>
+      <button type="button" class="btn btn-excluir" id="pendExcConfirmar" disabled>Excluir marcadas</button>
+    </div>
     <div class="pend-lista" id="pendLista"></div>
   </section>
 
@@ -1418,7 +1442,10 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   tabEnv.addEventListener("click", function(){ abrir("env"); });
   tabPend.addEventListener("click", function(){ abrir("pend"); });
   tabCad.addEventListener("click", function(){
-    if(cadLiberado) abrir("cad"); else pedirSenha();
+    if(cadLiberado){ abrir("cad"); return; }
+    pedirSenha("Acesso restrito",
+      "Os cadastros trazem os preços de custo e as margens. Informe a senha para continuar.",
+      function(){ cadLiberado=true; abrir("cad"); });
   });
 
   /* sub-navegação dos cadastros */
@@ -2873,6 +2900,11 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
 
   /* ---------- senha da aba Cadastros ---------- */
   var cadLiberado=false;
+  /* A mesma senha libera a exclusão de fichas, nas abas Fichas enviadas e Pendências. */
+  var exclusaoLiberada=false;
+  var excEnv={modo:false}, excPend={modo:false};
+  /* recado que precisa sobreviver ao recarregamento da lista */
+  var recadoEnv=null, recadoPend=null;
 
   function hashSenha(txt){
     if(window.crypto && window.crypto.subtle && window.TextEncoder){
@@ -2894,13 +2926,12 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     return Promise.resolve(txt===SENHA_CADASTROS);
   }
 
-  function pedirSenha(){
+  function pedirSenha(titulo, texto, aoEntrar){
     var bg=document.createElement("div");
     bg.className="modal-bg";
-    bg.innerHTML='<div class="modal" role="dialog" aria-modal="true" aria-label="Acesso aos cadastros">'
-      + '<h4>Acesso restrito</h4>'
-      + '<p class="aviso-senha">Os cadastros trazem os preços de custo e as margens. '
-      + 'Informe a senha para continuar.</p>'
+    bg.innerHTML='<div class="modal" role="dialog" aria-modal="true" aria-label="'+esc(titulo)+'">'
+      + '<h4>'+esc(titulo)+'</h4>'
+      + '<p class="aviso-senha">'+esc(texto)+'</p>'
       + '<label class="f"><span class="f-label">Senha</span>'
       +   '<input type="password" class="sn-campo" autocomplete="current-password"></label>'
       + '<p class="erro-senha"></p>'
@@ -2925,8 +2956,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         }
         document.removeEventListener("keydown", tecla);
         bg.remove();
-        cadLiberado=true;
-        abrir("cad");
+        aoEntrar();
       });
     }
     function fechar(){ document.removeEventListener("keydown", tecla); bg.remove(); }
@@ -2944,6 +2974,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
 
   document.getElementById("btnBloquear").addEventListener("click", function(){
     cadLiberado=false;
+    exclusaoLiberada=false;
     abrir("os");
   });
 
@@ -3400,6 +3431,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   }
 
   function envPintar(){
+    if(recadoEnv){ envMsg(recadoEnv.txt, recadoEnv.tipo); recadoEnv=null; }
     var lista=envFiltradas();
     envTagEl.textContent = !envUnidadeAtual ? "—"
       : (lista.length===enviadas.length
@@ -3418,6 +3450,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     }
     envListaEl.innerHTML=lista.map(function(f){
       return '<div class="pend-item" data-linha="'+esc(f.linha)+'">'
+        + (excEnv.modo ? caixaExcluir(f.linha) : '')
         + '<div class="pi-dados">'
         +   '<b>'+esc(f.falecido||"(sem nome)")+'</b>'
         +   (f.contratante ? '<span class="pi-contr"><i>contratante</i> '+esc(f.contratante)+'</span>' : '')
@@ -3492,6 +3525,9 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         + '<p class="env-itens-txt">'+(txt ? esc(txt).split(" | ").join("<br>") : "—")+'</p>'
         + '<div class="env-total">Total <b>R$ '+fmtBRL(total)+'</b></div>';
     }
+
+    /* o atalho de excluir uma ficha só também fica atrás da senha */
+    document.getElementById("btnEnvExcluir").hidden = !exclusaoLiberada;
 
     btnEnvPdf.disabled = !j.detalhada;
     envNota.textContent = j.detalhada ? ""
@@ -3634,6 +3670,11 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   }
 
   function pendPintar(){
+    if(recadoPend){
+      pendAvisoEl.textContent=recadoPend.txt;
+      pendAvisoEl.className="pend-aviso"+(recadoPend.tipo ? " "+recadoPend.tipo : "");
+      recadoPend=null;
+    }
     var filtro=pendFiltro.value||"";
     var lista=pendentes.filter(function(p){ return !filtro || String(p.unidade||"")===filtro; });
     pendContador(lista.length);
@@ -3649,6 +3690,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     pendListaEl.innerHTML = lista.map(function(p){
       var contr = (p.ficha && p.ficha.campos && p.ficha.campos.contratante) || "";
       return '<div class="pend-item" data-id="'+esc(p.id)+'">'
+        + (excPend.modo ? caixaExcluir(p.linha) : '')
         + '<div class="pi-dados">'
         +   '<b>'+esc(p.falecido||"(sem nome)")+'</b>'
         +   (contr ? '<span class="pi-contr"><i>contratante</i> '+esc(contr)+'</span>' : '')
@@ -4284,6 +4326,134 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   });
   window.addEventListener("focus", function(){ sincronizarCadastros(); });
   setInterval(function(){ sincronizarCadastros(); }, 300000);
+
+  /* ====== excluir fichas em lote, nas duas listas ======
+     Abre pela barra de cima, pede a mesma senha dos cadastros e deixa marcar
+     várias. Na planilha a ficha continua lá, marcada como excluída, com data e
+     motivo; se ela ainda esperava pagamento, a pendência vira cancelada. */
+  function caixaExcluir(linha){
+    var n=Number(linha)||0;
+    return n
+      ? '<label class="check exc-pick"><input type="checkbox" class="exc-cb" value="'+n+'"><span class="cx"></span></label>'
+      : '<span class="exc-vazio" title="Ficha antiga: não dá para excluir por aqui">—</span>';
+  }
+
+  function ligarExclusao(est, ids, repintar, aoTerminar){
+    var botao=document.getElementById(ids.botao),
+        barra=document.getElementById(ids.barra),
+        txt=document.getElementById(ids.txt),
+        todas=document.getElementById(ids.todas),
+        cancelar=document.getElementById(ids.cancelar),
+        confirmar=document.getElementById(ids.confirmar),
+        lista=document.getElementById(ids.lista);
+    if(!botao || !barra || !lista) return;
+
+    function marcadas(){
+      var r=[];
+      Array.prototype.forEach.call(lista.querySelectorAll(".exc-cb"), function(c){
+        if(c.checked) r.push(Number(c.value));
+      });
+      return r;
+    }
+    function atualizar(){
+      var n=marcadas().length;
+      txt.textContent = !n ? "Marque as fichas que quer excluir."
+        : (n===1 ? "1 ficha marcada." : n+" fichas marcadas.");
+      confirmar.disabled = !n;
+      Array.prototype.forEach.call(lista.querySelectorAll(".pend-item"), function(it){
+        var c=it.querySelector(".exc-cb");
+        if(c && c.checked) it.classList.add("sel-on"); else it.classList.remove("sel-on");
+      });
+    }
+    function ligar(v){
+      est.modo=v;
+      barra.hidden=!v;
+      botao.textContent = v ? "Sair da exclusão" : "Excluir fichas";
+      if(todas) todas.checked=false;
+      repintar();
+      if(v) atualizar();
+    }
+
+    botao.addEventListener("click", function(){
+      if(est.modo){ ligar(false); return; }
+      if(exclusaoLiberada){ ligar(true); return; }
+      pedirSenha("Excluir fichas",
+        "A ficha sai das listas e continua guardada na planilha, marcada como excluída. "
+        + "Informe a senha dos cadastros para continuar.",
+        function(){ exclusaoLiberada=true; ligar(true); });
+    });
+    cancelar.addEventListener("click", function(){ ligar(false); });
+    lista.addEventListener("change", function(e){
+      if(e.target.classList && e.target.classList.contains("exc-cb")) atualizar();
+    });
+    if(todas) todas.addEventListener("change", function(){
+      var v=todas.checked;
+      Array.prototype.forEach.call(lista.querySelectorAll(".exc-cb"), function(c){ c.checked=v; });
+      atualizar();
+    });
+
+    confirmar.addEventListener("click", function(){
+      var linhas=marcadas();
+      if(!linhas.length) return;
+      var motivo=prompt(
+          (linhas.length===1 ? "Excluir 1 ficha?" : "Excluir "+linhas.length+" fichas?")+"\n\n"
+        + "Elas saem das listas, mas continuam guardadas na planilha, marcadas como excluídas, "
+        + "com a data e o motivo.\n\nMotivo (pode deixar em branco):", "");
+      if(motivo===null) return;
+
+      confirmar.disabled=true; cancelar.disabled=true; botao.disabled=true;
+      var feitas=0, falhas=[];
+      function passo(i){
+        if(i>=linhas.length){
+          confirmar.disabled=false; cancelar.disabled=false; botao.disabled=false;
+          ligar(false);
+          aoTerminar(feitas, falhas);
+          return;
+        }
+        txt.textContent="Excluindo "+(i+1)+" de "+linhas.length+"…";
+        fetch(ENVIO_URL, {
+          method:"POST",
+          headers:{"Content-Type":"text/plain;charset=utf-8"},
+          body: JSON.stringify({acao:"excluirFicha", linha:linhas[i], motivo:motivo})
+        })
+        .then(function(r){ return r.text(); })
+        .then(function(t){
+          var j=null; try{ j=JSON.parse(t); }catch(e){}
+          if(j && j.ok) feitas++; else falhas.push((j && j.erro) || "o servidor recusou");
+        })
+        .catch(function(){ falhas.push("falha de rede"); })
+        .then(function(){ passo(i+1); });
+      }
+      passo(0);
+    });
+  }
+
+  function recadoExclusao(feitas, falhas){
+    var t = !feitas ? "Nenhuma ficha foi excluída."
+          : (feitas===1 ? "1 ficha excluída e guardada na planilha como excluída."
+                        : feitas+" fichas excluídas e guardadas na planilha como excluídas.");
+    if(falhas.length) t += " "+falhas.length+" não deu certo: "+falhas[0]+".";
+    return t;
+  }
+
+  ligarExclusao(excEnv,
+    {botao:"btnEnvExcluirModo", barra:"envExcBar", txt:"envExcTxt", todas:"envExcTodas",
+     cancelar:"envExcCancelar", confirmar:"envExcConfirmar", lista:"envLista"},
+    envPintar,
+    function(feitas, falhas){
+      recadoEnv={txt:recadoExclusao(feitas, falhas), tipo:(falhas.length ? "erro" : "")};
+      envCarregar(true);
+    });
+
+  ligarExclusao(excPend,
+    {botao:"btnPendExcluirModo", barra:"pendExcBar", txt:"pendExcTxt", todas:"pendExcTodas",
+     cancelar:"pendExcCancelar", confirmar:"pendExcConfirmar", lista:"pendLista"},
+    pendPintar,
+    function(feitas, falhas){
+      recadoPend={txt:recadoExclusao(feitas, falhas), tipo:(falhas.length ? "erro" : "")};
+      pendCarregar();
+    });
+
 })();
 </script>
 </body>
