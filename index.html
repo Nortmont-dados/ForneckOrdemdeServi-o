@@ -3469,6 +3469,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         + '<button type="button" class="btn btn-solid env-abrir">Abrir</button>'
         + '</div>';
     }).join("");
+    if(excEnv.modo && excEnv.atualizar) excEnv.atualizar();
   }
 
   function envBuscarFicha(linha){
@@ -3709,6 +3710,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         + '<button type="button" class="btn btn-solid pi-abrir">Informar pagamento</button>'
         + '</div>';
     }).join("");
+    if(excPend.modo && excPend.atualizar) excPend.atualizar();
   }
   pendFiltro.addEventListener("change", function(){ pendFiltroEscolhido=true; pendPintar(); });
 
@@ -4339,7 +4341,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     var n=Number(linha)||0;
     return n
       ? '<label class="check exc-pick"><input type="checkbox" class="exc-cb" value="'+n+'"><span class="cx"></span></label>'
-      : '<span class="exc-vazio" title="Ficha antiga: não dá para excluir por aqui">—</span>';
+      : '<span class="exc-vazio" title="O servidor não informou a linha desta ficha">—</span>';
   }
 
   function ligarExclusao(est, ids, repintar, aoTerminar){
@@ -4361,6 +4363,15 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     }
     function atualizar(){
       var n=marcadas().length;
+      var itens=lista.querySelectorAll(".pend-item").length;
+      var caixas=lista.querySelectorAll(".exc-cb").length;
+      if(itens && !caixas){
+        /* o servidor não disse em que linha cada ficha está: código antigo */
+        txt.textContent="Publique a nova versão do Apps Script (Implantar › Gerenciar "
+          + "implantações › Nova versão) para poder excluir por aqui.";
+        confirmar.disabled=true;
+        return;
+      }
       txt.textContent = !n ? "Marque as fichas que quer excluir."
         : (n===1 ? "1 ficha marcada." : n+" fichas marcadas.");
       confirmar.disabled = !n;
@@ -4369,6 +4380,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         if(c && c.checked) it.classList.add("sel-on"); else it.classList.remove("sel-on");
       });
     }
+    est.atualizar=atualizar;
+
     function ligar(v){
       est.modo=v;
       barra.hidden=!v;
