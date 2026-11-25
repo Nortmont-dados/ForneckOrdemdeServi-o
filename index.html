@@ -1769,12 +1769,23 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     return parc.map(function(f){ return {forma:f, base:formasOS.valorDe(f)}; });
   }
 
+  /* A listinha "Parcelar em" aparece sempre que o pagamento está dividido entre
+     formas e pelo menos uma delas aceita parcela: é ali que se escolhe qual
+     forma parcelar e em quantas vezes. Com uma forma só, quem manda é o campo
+     "Parcelas" lá de cima, como sempre foi. */
+  function usaEscolha(){
+    if(typeof formasOS==="undefined" || !formasOS) return false;
+    return formasOS.lista().length>=2 && formasOS.parcelaveis().length>0;
+  }
+  var escolhaPar=false;
+
   function montarPlanos(forcar){
-    var alvos=alvosParcelas(), unico=alvos.length===1, antigos=planos;
+    var alvos=alvosParcelas(), antigos=planos;
+    escolhaPar=usaEscolha();
     planos = alvos.map(function(a){
       var v=null, i;
       for(i=0;i<antigos.length;i++) if(antigos[i].forma===a.forma){ v=antigos[i]; break; }
-      var n = unico ? (parseInt(selParcelas.value,10)||1) : (v ? v.n : 1);
+      var n = escolhaPar ? (v ? v.n : 1) : (parseInt(selParcelas.value,10)||1);
       if(!(n>=1 && n<=12)) n=1;
       var mesmo = !!(v && v.itens.length===n);
       if(mesmo && v.editado && !forcar)
@@ -1782,8 +1793,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       var datas = mesmo ? v.itens.map(function(p){ return p.venc; }) : datasPadrao(n);
       return {forma:a.forma, base:a.base, n:n, itens:dividir(a.base,n,datas), editado:false};
     });
-    if(campoParcelas) campoParcelas.hidden = !unico;
-    if(unico && planos[0]) selParcelas.value=String(planos[0].n);
+    if(campoParcelas) campoParcelas.hidden = escolhaPar;
+    if(!escolhaPar && planos[0]) selParcelas.value=String(planos[0].n);
     pintarPlanos();
   }
 
@@ -1803,7 +1814,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
      que parcelar. Com o pagamento dividido entre duas formas que aceitam
      parcela, uma listinha em cima escolhe em quantas vezes vai cada uma. */
   function pintarPlanos(){
-    var varios=planos.length>1, h="";
+    var varios=escolhaPar, h="";
     if(varios){
       h += '<div class="parcelas parc-escolha"><div class="par-head"><span>Parcelar em</span></div>'
         + '<table class="par-tab"><tbody>'
@@ -3705,12 +3716,19 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
     if(!parc.length) return [{forma:"", base:pendTotalNum()}];
     return parc.map(function(f){ return {forma:f, base:formasPend.valorDe(f)}; });
   }
+  function pendUsaEscolha(){
+    if(typeof formasPend==="undefined" || !formasPend) return false;
+    return formasPend.lista().length>=2 && formasPend.parcelaveis().length>0;
+  }
+  var pendEscolhaPar=false;
+
   function pendMontarPlanos(forcar){
-    var alvos=pendAlvos(), unico=alvos.length===1, antigos=pendPlanos;
+    var alvos=pendAlvos(), antigos=pendPlanos;
+    pendEscolhaPar=pendUsaEscolha();
     pendPlanos = alvos.map(function(a){
       var v=null, i;
       for(i=0;i<antigos.length;i++) if(antigos[i].forma===a.forma){ v=antigos[i]; break; }
-      var n = unico ? (parseInt(pendSelPar.value,10)||1) : (v ? v.n : 1);
+      var n = pendEscolhaPar ? (v ? v.n : 1) : (parseInt(pendSelPar.value,10)||1);
       if(!(n>=1 && n<=12)) n=1;
       var mesmo = !!(v && v.itens.length===n);
       if(mesmo && v.editado && !forcar)
@@ -3718,12 +3736,12 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
       var datas = mesmo ? v.itens.map(function(p){ return p.venc; }) : pendDatas(n);
       return {forma:a.forma, base:a.base, n:n, itens:dividir(a.base,n,datas), editado:false};
     });
-    if(pendCampoPar) pendCampoPar.hidden = !unico;
-    if(unico && pendPlanos[0]) pendSelPar.value=String(pendPlanos[0].n);
+    if(pendCampoPar) pendCampoPar.hidden = pendEscolhaPar;
+    if(!pendEscolhaPar && pendPlanos[0]) pendSelPar.value=String(pendPlanos[0].n);
     pendPintarPlanos();
   }
   function pendPintarPlanos(){
-    var varios=pendPlanos.length>1, h="";
+    var varios=pendEscolhaPar, h="";
     if(varios){
       h += '<div class="parcelas parc-escolha"><div class="par-head"><span>Parcelar em</span></div>'
         + '<table class="par-tab"><tbody>'
