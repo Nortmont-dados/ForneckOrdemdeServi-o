@@ -1786,14 +1786,14 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
   function somaItens(l){ return l.reduce(function(a,p){ return a+parseBRL(p.valor); },0); }
   function totalAtual(){ return parseBRL(elTotal.textContent); }
 
-  /* O que cada bloco precisa cobrir. Uma forma só, ou todas à vista: o total da
-     ficha. Pagamento dividido: o valor de cada forma que aceita parcela. */
+  /* O que cada bloco precisa cobrir. Uma forma só: o total da ficha. Pagamento
+     dividido: o valor de cada forma, uma por bloco. Qualquer forma pode ser
+     parcelada, inclusive dinheiro e pix: quem decide é quem está atendendo. */
   function alvosParcelas(){
     if(typeof formasOS==="undefined" || !formasOS) return [{forma:"", base:totalAtual()}];
-    var l=formasOS.lista(), parc=formasOS.parcelaveis();
-    if(l.length<2) return [{forma:(parc.length ? parc[0] : ""), base:totalAtual()}];
-    if(!parc.length) return [{forma:"", base:totalAtual()}];
-    return parc.map(function(f){ return {forma:f, base:formasOS.valorDe(f)}; });
+    var l=formasOS.lista();
+    if(l.length<2) return [{forma:(l.length ? l[0] : ""), base:totalAtual()}];
+    return l.map(function(f){ return {forma:f, base:formasOS.valorDe(f)}; });
   }
 
   /* A listinha "Parcelar em" aparece sempre que o pagamento está dividido entre
@@ -1802,7 +1802,7 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
      "Parcelas" lá de cima, como sempre foi. */
   function usaEscolha(){
     if(typeof formasOS==="undefined" || !formasOS) return false;
-    return formasOS.lista().length>=2 && formasOS.parcelaveis().length>0;
+    return formasOS.lista().length>=2;
   }
   var escolhaPar=false;
 
@@ -1947,6 +1947,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
      Uma só forma funciona como antes. Com duas ou mais, aparece um campo de
      valor para cada uma e a soma é conferida contra o total da ficha. */
   /* formas que não têm parcelamento: ao marcar só essas, o número de parcelas volta para 1 */
+  /* Formas que normalmente saem à vista: serve só para já deixar o parcelamento
+     em 1x quando elas são marcadas. Dá para parcelar qualquer uma delas depois. */
   var FORMAS_A_VISTA = ["Pix","Cartão de débito","Dinheiro","Seguradora","Prefeitura"];
 
   function criarFormas(campo, idBloco, idBody, idStatus, idDividir, totalDe, aoMudar){
@@ -2052,7 +2054,8 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
         for(var i=0;i<l.length;i++) if(FORMAS_A_VISTA.indexOf(l[i])<0) return false;
         return true;
       },
-      /* Formas que aceitam parcela: cada uma ganha o seu bloco de parcelamento. */
+      /* Formas que costumam ser parceladas; o bloco de parcelamento, hoje, é
+         oferecido para todas. */
       parcelaveis: function(){
         return lista().filter(function(f){ return FORMAS_A_VISTA.indexOf(f)<0; });
       },
@@ -3753,14 +3756,13 @@ var SENHA_CADASTROS_HASH = "8a33a9c855cfa386995f330315a420905307a481e2f3a8a0953f
 
   function pendAlvos(){
     if(typeof formasPend==="undefined" || !formasPend) return [{forma:"", base:pendTotalNum()}];
-    var l=formasPend.lista(), parc=formasPend.parcelaveis();
-    if(l.length<2) return [{forma:(parc.length ? parc[0] : ""), base:pendTotalNum()}];
-    if(!parc.length) return [{forma:"", base:pendTotalNum()}];
-    return parc.map(function(f){ return {forma:f, base:formasPend.valorDe(f)}; });
+    var l=formasPend.lista();
+    if(l.length<2) return [{forma:(l.length ? l[0] : ""), base:pendTotalNum()}];
+    return l.map(function(f){ return {forma:f, base:formasPend.valorDe(f)}; });
   }
   function pendUsaEscolha(){
     if(typeof formasPend==="undefined" || !formasPend) return false;
-    return formasPend.lista().length>=2 && formasPend.parcelaveis().length>0;
+    return formasPend.lista().length>=2;
   }
   var pendEscolhaPar=false;
 
